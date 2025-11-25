@@ -1,13 +1,16 @@
-// src/components/layout/MainLayout.js
-import Navbar from "./Navbar";
-import Footer from "./Footer";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import NavbarAuth from "./NavbarAuth";
+import Navbar from "./Navbar"; // navbar público
 
 export default function MainLayout({ children }) {
+  const { user } = useContext(AuthContext);
+
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen">{children}</main>
-      <Footer />
-    </>
+    <div>
+      {user ? <NavbarAuth /> : <Navbar />}
+
+      <main>{children}</main>
+    </div>
   );
 }

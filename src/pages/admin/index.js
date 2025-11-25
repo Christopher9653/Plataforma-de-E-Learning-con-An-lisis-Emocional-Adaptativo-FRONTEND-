@@ -178,16 +178,6 @@ export default function AdminDashboard() {
       </div>
     </div>
   </div>
-
-  {/* Botón de cerrar sesión */}
-  <div className="mt-8 flex justify-end">
-    <button
-      onClick={logout}
-      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
-    >
-      Cerrar Sesión
-    </button>
-  </div>
 </div>
     </MainLayout>
   );

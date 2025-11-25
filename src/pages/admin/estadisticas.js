@@ -1,16 +1,16 @@
 import MainLayout from "@/components/layout/MainLayout";
 import useAuth from "@/hooks/useAuth";
 
-export default function ReportesAdmin() {
+export default function EstadisticasAdmin() {
   useAuth("admin");
 
   return (
     <MainLayout>
       <div className="p-10">
-        <h1 className="text-2xl font-bold mb-4">Reportes Globales</h1>
+        <h1 className="text-2xl font-bold mb-4">Estadísticas Avanzadas</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <p>Reportes del comportamiento académico y emocional.</p>
+          <p>Aquí irán gráficos del progreso general, emociones y actividad.</p>
         </div>
       </div>
     </MainLayout>
