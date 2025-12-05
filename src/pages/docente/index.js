@@ -36,12 +36,9 @@ export default function DocenteDashboard() {
 
         {/* Encabezado */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">EduAdapt</h1>
-          <h2 className="text-2xl font-semibold text-gray-700 mt-2">
-            Panel del Docente
-          </h2>
+          <h1 className="text-3xl font-bold text-gray-800">Hola de Nuevo, {user?.name || "Estudiante"}</h1>
           <p className="text-gray-600 mt-1">
-            Gestión de clases, estudiantes y reportes emocionales
+            Gestiona tus clases, estudiantes y revisa los reportes de progreso aquí.
           </p>
         </div>
 
@@ -92,17 +89,6 @@ export default function DocenteDashboard() {
 
           <ClassList classes={misClases} />
         </div>
-
-        {/* Botón logout */}
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
-          >
-            Cerrar Sesión
-          </button>
-        </div>
-
       </div>
     </MainLayout>
   );

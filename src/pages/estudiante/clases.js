@@ -1,40 +1,36 @@
-import MainLayout from "@/components/layout/MainLayout";
-import useAuth from "@/hooks/useAuth";
 import ClassCard from "@/components/clases/ClassCard";
+import MainLayout from "@/components/layout/MainLayout";
+import { useRouter } from "next/router";
 
-export default function EstudianteClases() {
-  useAuth("estudiante");
+export default function ClasesEstudiante() {
+  const router = useRouter();
 
-  const clases = [
+  const cursos = [
     {
-      id: 1,
+      id: "prog101",
       titulo: "Introducción a la Programación",
-      profesor: "Ing. Juan Pérez",
-      descripcion: "Aprende los fundamentos de la programación paso a paso.",
-      imagen: "/programacion.jpg",
+      profesor: "Juan Pérez",
+      imagen: "/img/curso1.jpg"
     },
     {
-      id: 2,
+      id: "bio202",
       titulo: "Biología General",
-      profesor: "Dra. Ana Torres",
-      descripcion: "Comprende la vida desde la célula hasta los ecosistemas.",
-      imagen: "/biologia.jpg",
+      profesor: "Laura Ruiz",
+      imagen: "/img/curso2.jpg"
     },
   ];
 
   return (
     <MainLayout>
-      <div className="p-10 bg-gray-50 min-h-screen">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          Clases Disponibles
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {clases.map((clase) => (
-            <ClassCard key={clase.id} clase={clase} />
-          ))}
-        </div>
-      </div>
+    <div className="p-8 grid md:grid-cols-3 gap-6">
+      {cursos.map((curso) => (
+        <ClassCard
+          key={curso.id}
+          clase={curso}
+          onClick={() => router.push(`/estudiante/clase/${curso.id}`)}
+        />
+      ))}
+    </div>
     </MainLayout>
   );
 }

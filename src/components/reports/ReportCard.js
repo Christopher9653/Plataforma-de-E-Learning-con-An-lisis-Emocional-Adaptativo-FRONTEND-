@@ -9,12 +9,20 @@ export default function ReportCard({ reporte }) {
         Fecha: <span className="font-medium">{reporte.fecha}</span>
       </p>
 
-      <a
-        href="#"
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-block"
-      >
-        Ver Reporte
-      </a>
+      <div className="space-x-6 py-4 whitespace-nowrap text-sm">
+                <a
+          href="#"
+          className="px-4 py-2 bg-blue-500 text-white border-blue-600 rounded-lg font-medium"
+        >
+          Ver reporte
+        </a>
+        <a
+          href="#"
+          className="px-3 py-2 bg-red-400 text-white border-red-600 rounded-lg font-medium"
+        >
+          Descargar PDF
+        </a>
+      </div>
     </div>
   );
 }

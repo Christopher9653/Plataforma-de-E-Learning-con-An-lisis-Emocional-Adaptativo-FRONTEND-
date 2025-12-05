@@ -1,45 +1,63 @@
-// src/components/emotion/EmotionDetector.js
-import { useEffect, useState } from "react";
-import WebcamFeed from "./WebcamFeed";
-import EmotionStatusBox from "./EmotionStatusBox";
+import { useEffect, useRef } from "react";
 
-export default function EmotionDetector({ onDetect }) {
-  const [emotions, setEmotions] = useState({
-    joy: 0,
-    sadness: 0,
-    anger: 0,
-    fear: 0,
-    surprise: 0,
-    neutral: 0,
-  });
+export default function EmotionDetector({ onResult }) {
+  const videoRef = useRef(null);
 
-  // 🔥 Simulación temporal (hasta integrar MorphCast real)
   useEffect(() => {
-    const interval = setInterval(() => {
-      const randomEmotions = {
-        joy: Math.floor(Math.random() * 100),
-        sadness: Math.floor(Math.random() * 100),
-        anger: Math.floor(Math.random() * 100),
-        fear: Math.floor(Math.random() * 100),
-        surprise: Math.floor(Math.random() * 100),
-        neutral: Math.floor(Math.random() * 100),
-      };
+    let engine;
 
-      setEmotions(randomEmotions);
+    const loadMorphcast = async () => {
+      if (typeof window === "undefined") return;
 
-      if (onDetect) onDetect(randomEmotions);
-    }, 1800);
+      // Cargar script si no existe
+      if (!window.CY) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "https://ai-sdk.morphcast.com/v1.16/ai-sdk.js";
+          script.onload = resolve;
+          document.body.appendChild(script);
+        });
+      }
 
-    return () => clearInterval(interval);
+      const CY = window.CY;
+
+      CY.loader()
+        .licenseKey("skb1663adefe272deae8644453bf9e22b4b658995cf752") // ⬅️ Sustituye por la tuya
+        .addModule(CY.modules().FACE_DETECTOR.name)
+        .addModule(CY.modules().FACE_EMOTION.name)
+        .source(videoRef.current)
+        .load()
+        .then((instance) => {
+          engine = instance;
+
+          instance.start();
+
+          window.addEventListener(
+            CY.modules().FACE_EMOTION.eventName,
+            (evt) => {
+              const data = evt.detail.output.emotion;
+              if (onResult) onResult(data);
+            }
+          );
+        });
+    };
+
+    loadMorphcast();
+
+    return () => {
+      if (engine) engine.stop();
+    };
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-      {/* Cámara */}
-      <WebcamFeed width={450} height={320} />
-
-      {/* Estado emocional */}
-      <EmotionStatusBox emotions={emotions} />
-    </div>
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      playsInline
+      width="1"
+      height="1"
+      style={{ opacity: 0, pointerEvents: "none" }}
+    />
   );
 }
