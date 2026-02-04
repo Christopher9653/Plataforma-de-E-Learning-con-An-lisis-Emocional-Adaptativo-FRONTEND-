@@ -1,34 +1,51 @@
-// src/components/classes/ClassCard.js
+import Link from "next/link";
 
-export default function ClassCard({ clase = {},onClick  }) {
-  const {
-    titulo = "Sin título",
-    descripcion = "Sin descripción",
-    estudiantes = 0,
-    imagen = "https://via.placeholder.com/600x400?text=Curso",
-  } = clase;
+export default function ClassCard({ clase }) {
+  if (!clase) return null;
+
   return (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
-    >
-      <img
-        src={clase.imagen || "/img/placeholder.jpg"}
-        className="h-40 w-full object-cover"
-        alt="Vista del curso"
-      />
+    <div className="bg-white dark:bg-zinc-800 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
 
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800">{clase.titulo}</h3>
-        <p className="text-gray-600 text-sm mt-1">{clase.profesor}</p>
-    
-        <p className="text-gray-600 dark:text-gray-300 text-sm mt-2 line-clamp-2">
-          {descripcion}
+      {/* Imagen */}
+      <div className="h-40 bg-gray-200 dark:bg-zinc-700">
+        <img
+          src={clase.imagen}
+          alt={clase.titulo}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Contenido */}
+      <div className="p-5">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white line-clamp-2">
+          {clase.titulo}
+        </h3>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
+          {clase.descripcion}
         </p>
 
-        <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
-          Ver clase
-        </button>
+        {/* Estadísticas */}
+        <div className="flex justify-between items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
+          <span>👥 {clase.estudiantes} estudiantes</span>
+        </div>
+
+        {/* Acciones */}
+        <div className="mt-5 flex gap-2">
+          <Link
+            href={`/dashboard/docente/clases/${clase.id}`}
+            className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Ver curso
+          </Link>
+
+          {/* FUTURO */}
+          {/* 
+          <button className="px-4 py-2 border rounded-lg hover:bg-gray-100">
+            Editar
+          </button>
+          */}
+        </div>
       </div>
     </div>
   );

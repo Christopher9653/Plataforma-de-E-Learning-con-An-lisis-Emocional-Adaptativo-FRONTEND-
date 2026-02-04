@@ -1,35 +1,56 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import EmotionEngine from "@/components/emotion/EmotionEngine";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { useEmotion } from "@/context/EmotionContext";
+
 
 export default function ClassVideoPlayer({ curso }) {
-  const [videoActual, setVideoActual] = useState({
-    titulo: "",
-    videoUrl: "",
-  });
+  const router = useRouter();
 
+  const [videoActual, setVideoActual] = useState(null);
   const [modulosAbiertos, setModulosAbiertos] = useState({});
   const [videoPlaying, setVideoPlaying] = useState(false);
-  const [emocionActual, setEmocionActual] = useState("Analizando...");
 
   // MORPHCAST
   const [accepted, setAccepted] = useState(false);
   const [stopEmotion, setStopEmotion] = useState(false);
   const [emotionTools, setEmotionTools] = useState(null);
+  const { user, token } = useContext(AuthContext);
+
+  //Para backend
+  const [emotionalReport, setEmotionalReport] = useState(null);
+  const [enviandoPrueba, setEnviandoPrueba] = useState(false);
+
+  //Para guardar emotion_report
+  const { setEmotionReport } = useEmotion();
+
 
   const videoRef = useRef(null);
 
   // ================================
-  // CARGAR PRIMERA CLASE
+  // CARGAR PRIMERA CLASE (BACKEND)
   // ================================
   useEffect(() => {
-    if (curso?.modulos?.length > 0) {
-      const primera = curso.modulos[0].clases[0];
-      setVideoActual({
-        titulo: primera.titulo,
-        videoUrl: primera.videoUrl,
-      });
-    }
+    if (!curso || !Array.isArray(curso.modulos)) return;
+
+    const primerModulo = curso.modulos.find(
+      (m) => Array.isArray(m.clases) && m.clases.length > 0
+    );
+
+    if (!primerModulo) return;
+
+    const primeraClase = primerModulo.clases[0];
+
+    setVideoActual({
+      id: primeraClase.id,
+      titulo: primeraClase.title || primeraClase.titulo,
+      videoUrl: primeraClase.video_url || primeraClase.videoUrl,
+      id_prueba: primeraClase.id_prueba || null,
+    });
   }, [curso]);
 
   // ================================
@@ -38,17 +59,22 @@ export default function ClassVideoPlayer({ curso }) {
   const handleClassChange = (clase) => {
     if (videoPlaying) return;
 
+    if (isClaseBloqueada(clase)) {
+      alert("Debes aprobar la prueba de esta clase para continuar.");
+      return;
+    }
+
     setVideoActual({
-      titulo: clase.titulo,
-      videoUrl: clase.videoUrl,
+      id: clase.id,
+      titulo: clase.title || clase.titulo,
+      videoUrl: clase.video_url || clase.videoUrl,
+      id_prueba: clase.id_prueba || null,
     });
 
-    // reset del análisis
     setAccepted(false);
     setEmotionTools(null);
-
-    setStopEmotion(true); // detener engine actual
-    setTimeout(() => setStopEmotion(false), 200); // reiniciar engine
+    setStopEmotion(true);
+    setTimeout(() => setStopEmotion(false), 200);
     setVideoPlaying(false);
   };
 
@@ -61,73 +87,121 @@ export default function ClassVideoPlayer({ curso }) {
   };
 
   // ================================
-  // EVITAR PAUSA
+  // EVITAR PAUSA DEL VIDEO
   // ================================
-useEffect(() => {
-  if (!videoRef.current) return;
+  useEffect(() => {
+    if (!videoRef.current) return;
 
-  const vid = videoRef.current;
+    const vid = videoRef.current;
 
-  const handlePause = () => {
-    // 🔥 Si el video terminó, NO volver a reproducir
-    if (vid.ended) return;
+    const handlePause = () => {
+      if (vid.ended) return;
+      if (videoPlaying) vid.play();
+    };
 
-    // 🔥 Evitar pausa manual solo mientras está playing
-    if (videoPlaying) vid.play();
-  };
+    vid.addEventListener("pause", handlePause);
+    return () => vid.removeEventListener("pause", handlePause);
+  }, [videoPlaying]);
 
-  vid.addEventListener("pause", handlePause);
-  return () => vid.removeEventListener("pause", handlePause);
-}, [videoPlaying]);
-  // boton Volver
-  const router = useRouter();
-  //Boton siguiente
+  // ================================
+  // SIGUIENTE CLASE (FIX DEFINITIVO)
+  // ================================
   const goToNextClass = () => {
-    if (videoPlaying) return; // No avanzar si el video está en reproducción
+    if (!curso?.modulos?.length || !videoActual) return;
 
-    const modulos = curso?.modulos || [];
-
-    // 1️⃣ Aplanar todas las clases de todos los módulos en un solo array
-    const todasLasClases = [];
-    modulos.forEach((mod) => {
-      mod.clases.forEach((cl) => {
-        todasLasClases.push({
-          moduloId: mod.id,
-          ...cl,
-        });
-      });
-    });
-
-    // 2️⃣ Encontrar la clase actual
-    const indexActual = todasLasClases.findIndex(
-      (cl) => cl.videoUrl === videoActual.videoUrl
+    const todasLasClases = curso.modulos.flatMap((m) =>
+      Array.isArray(m.clases) ? m.clases : []
     );
 
-    if (indexActual === -1) {
-      console.warn("Clase actual no encontrada en el curso.");
+    if (!todasLasClases.length) return;
+
+    const indexActual = todasLasClases.findIndex(
+      (c) => c.id === videoActual.id
+    );
+
+    const siguiente = todasLasClases[indexActual + 1];
+
+    if (!siguiente) {
+      alert("Has llegado al final del curso.");
       return;
     }
 
-    // 3️⃣ Determinar si existe una siguiente clase
-    const indexSiguiente = indexActual + 1;
-
-    if (indexSiguiente < todasLasClases.length) {
-      const nextClase = todasLasClases[indexSiguiente];
-
-      // Cambiar a la siguiente clase
-      setVideoActual({
-        titulo: nextClase.titulo,
-        videoUrl: nextClase.videoUrl,
-      });
-
-      // 🔄 Reiniciar MorphCast sin tocar la UI que ya tienes
-      setAccepted(false);
-      setEmotionTools(null);
-      setStopEmotion(true);
-    } else {
-      alert("Has llegado al final del curso.");
+    if (isClaseBloqueada(siguiente)) {
+      alert("Debes aprobar la prueba antes de avanzar.");
+      return;
     }
+
+    setVideoActual({
+      id: siguiente.id,
+      titulo: siguiente.title || siguiente.titulo,
+      videoUrl: siguiente.video_url || siguiente.videoUrl,
+      id_prueba: siguiente.id_prueba || null,
+    });
+
+    setAccepted(false);
+    setEmotionTools(null);
+    setStopEmotion(true);
   };
+
+  // ================================
+  // BLOQUEO DE CLASES (TEMPORAL)
+  // ================================
+  const isClaseBloqueada = (clase) => {
+    if (!clase?.id_prueba) return false;
+
+    const progreso = JSON.parse(localStorage.getItem("progresoCursos")) || {};
+
+    return !progreso?.[curso.id]?.pruebas?.[clase.id_prueba]?.aprobado;
+  };
+
+  // ================================
+  // Generador de Prueba
+  // ================================
+const generarPrueba = async () => {
+  try {
+    const report = emotionTools?.getReport();
+     if (!report) {
+    alert("No se ha generado el reporte emocional.");
+    console.log("No se ha ggenerado: ",report);
+    return;
+  }
+
+    // ✅ Guardar en contexto global
+    setEmotionReport(report);
+
+    const res = await fetch("http://localhost:8000/api/generate-test-attempt/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        student_id: user.id,
+        chapter_id: videoActual.id,
+        informe_emocional: emotionalReport,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    router.push(`/dashboard/estudiante/quizzes/${videoActual.id}`);
+  } catch (err) {
+    console.error("Error al generar prueba:", err.message);
+    alert("No se pudo generar la prueba");
+  }
+};
+
+
+  // ================================
+  // LOADING
+  // ================================
+  if (!curso || !videoActual) {
+    return <p className="p-6">Cargando curso...</p>;
+  }
 
   // ================================
   // RENDER
@@ -137,19 +211,18 @@ useEffect(() => {
       {/* TOP BAR */}
       <div className="w-full bg-[#1c1d1f] text-white px-6 py-3 flex justify-between items-center shadow-lg">
         <div className="text-lg font-medium">
-          Curso: {curso?.nombre || "Cargando..."}{" "}
-          <span className="text-sm opacity-80">(Progreso: 45%)</span>
+          Curso: {curso.title || curso.nombre}
         </div>
 
         <div className="flex gap-6 text-sm">
           <button
             disabled={videoPlaying}
-            onClick={() => router.push("/estudiante/clases")}
-            className={`${
+            onClick={() => router.push("/dashboard/estudiante/cursos")}
+            className={
               videoPlaying
                 ? "opacity-40 cursor-not-allowed"
                 : "hover:text-blue-300"
-            }`}
+            }
           >
             ◀ Volver
           </button>
@@ -157,149 +230,117 @@ useEffect(() => {
           <button
             disabled={videoPlaying}
             onClick={goToNextClass}
-            className={`${
+            className={
               videoPlaying
                 ? "opacity-40 cursor-not-allowed"
                 : "hover:text-blue-300"
-            }`}
+            }
           >
             Siguiente lección ▶
-          </button>
-
-          <button
-            disabled={videoPlaying}
-            className={`${
-              videoPlaying
-                ? "opacity-40 cursor-not-allowed"
-                : "hover:text-blue-300"
-            }`}
-          >
-            Configuración
           </button>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* VIDEO */}
-        <div className="flex-1 bg-black flex flex-col items-center overflow-y-auto p-6">
-          <div className="flex flex-col items-center w-full">
-            {/* POPUP ACEPTACIÓN */}
-            {!accepted && (
-              <div className="bg-white p-6 rounded-lg shadow-lg text-center mb-5 w-[400px]">
-                <h2 className="text-xl font-semibold mb-3">
-                  Permitir Análisis Emocional
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Para continuar con esta clase es necesario permitir el
-                  análisis emocional.
-                </p>
+        <div className="flex-1 bg-black flex flex-col items-center p-6">
+          {!accepted && (
+            <div className="bg-white p-6 rounded-lg shadow-lg text-center mb-5 w-[400px]">
+              <h2 className="text-xl font-semibold mb-3">
+                Permitir Análisis Emocional
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Es necesario permitir el análisis emocional para continuar.
+              </p>
 
-                <button
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
-                  onClick={() => {
-                    setAccepted(true);
-                    setStopEmotion(false);
-
-                    setTimeout(() => {
-                      if (videoRef.current) {
-                        videoRef.current
-                          .play()
-                          .catch(() => console.warn("Autoplay bloqueado"));
-                      }
-                    }, 300);
-                  }}
-                >
-                  Aceptar y comenzar clase
-                </button>
-              </div>
-            )}
-
-            {/* ENGINE */}
-            {accepted && (
-              <EmotionEngine
-                stop={stopEmotion}
-                onDataReady={(tools) => {
-                  setEmotionTools(tools);
-                  setEmocionActual(tools.currentEmotion);
-                }}
-              />
-            )}
-
-            {/* VIDEO PLAYER */}
-            <div className="w-[1200px] h-[720px] rounded-lg overflow-hidden border border-gray-700 shadow-xl">
-              <video
-                ref={videoRef}
-                key={videoActual.videoUrl}
-                controls={false}
-                className="w-full h-full object-contain bg-black"
-                onPlay={() => setVideoPlaying(true)}
-                onEnded={() => {
-                  setVideoPlaying(false);
-                  setStopEmotion(true); // detener análisis
+              <button
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                onClick={() => {
+                  setAccepted(true);
+                  setStopEmotion(false);
+                  setTimeout(() => videoRef.current?.play(), 300);
                 }}
               >
-                <source src={videoActual.videoUrl} type="video/mp4" />
-              </video>
+                Aceptar y comenzar clase
+              </button>
             </div>
+          )}
 
-            <h2 className="text-white text-xl font-semibold mt-4">
-              {videoActual.titulo}
-            </h2>
+          {accepted && (
+            <EmotionEngine
+              stop={stopEmotion}
+              onDataReady={(tools) => setEmotionTools(tools)}
+            />
+          )}
 
-            {/* INFO EMOCIONAL */}
-            <div className="text-white">
-              <strong>Emoción actual:</strong>{" "}
-              {emotionTools?.currentEmotion || "Analizando..."}
-            </div>
+          <div className="w-[1200px] h-[720px] rounded-lg overflow-hidden border shadow-xl">
+            <video
+              ref={videoRef}
+              key={videoActual.videoUrl}
+              className="w-full h-full object-contain bg-black"
+              controls={false}
+              onPlay={() => setVideoPlaying(true)}
+              onEnded={() => {
+                setVideoPlaying(false);
+                setStopEmotion(true);
+
+                if (videoActual.id_prueba) {
+                  router.push(`/estudiante/pruebas/${videoActual.id_prueba}`);
+                }
+              }}
+            >
+              <source src={videoActual.videoUrl} type="video/mp4" />
+            </video>
           </div>
+
+          <h2 className="text-white text-xl font-semibold mt-4">
+            {videoActual.titulo}
+          </h2>
+
+          <button
+            onClick={generarPrueba}
+            disabled={!emotionTools || enviandoPrueba}
+            className={`mt-4 px-6 py-2 rounded-lg text-white ${
+              !emotionTools || enviandoPrueba
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {enviandoPrueba ? "Generando..." : "Generar prueba"}
+          </button>
         </div>
 
         {/* SIDEBAR */}
-        <div className="w-[350px] bg-white border-l overflow-y-auto p-6 shadow-inner">
-          <h3 className="text-xl font-bold mb-4 text-gray-800">
-            Contenido del Curso
-          </h3>
+        <div className="w-[350px] bg-white border-l p-6 overflow-y-auto">
+          <h3 className="text-xl font-bold mb-4">Contenido del Curso</h3>
 
-          {curso?.modulos?.map((mod, i) => (
-            <div key={i} className="mb-4 border rounded-lg overflow-hidden">
+          {curso.modulos.map((mod, i) => (
+            <div key={i} className="mb-4 border rounded-lg">
               <div
                 onClick={() => toggleModulo(i)}
-                className={`cursor-pointer bg-gray-100 px-4 py-3 flex justify-between items-center font-semibold 
-                  ${
-                    videoPlaying
-                      ? "opacity-40 cursor-not-allowed"
-                      : "hover:bg-gray-200"
-                  }`}
+                className="cursor-pointer bg-gray-100 px-4 py-3 flex justify-between font-semibold"
               >
-                {mod.nombre}
+                {mod.title || mod.nombre}
                 <span>{modulosAbiertos[i] ? "▲" : "▼"}</span>
               </div>
 
-              {modulosAbiertos[i] && (
-                <div>
-                  {mod.clases.map((cl, j) => (
-                    <div
-                      key={j}
-                      onClick={() => handleClassChange(cl)}
-                      className={`px-4 py-3 border-t 
-                      ${
-                        videoPlaying
-                          ? "opacity-40 cursor-not-allowed"
-                          : "cursor-pointer hover:bg-gray-100"
-                      }`}
-                    >
-                      ▶ {cl.titulo}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {modulosAbiertos[i] &&
+                mod.clases?.map((cl) => (
+                  <div
+                    key={cl.id}
+                    onClick={() => handleClassChange(cl)}
+                    className="px-4 py-3 border-t cursor-pointer hover:bg-gray-100"
+                  >
+                    ▶ {cl.title || cl.titulo}
+                  </div>
+                ))}
             </div>
           ))}
 
           <button
             disabled={!emotionTools}
             onClick={() => emotionTools?.exportJSON()}
-            className="mt-4 px-4 py-2 bg-gray-800 text-white w-full rounded-lg"
+            className="mt-4 w-full px-4 py-2 bg-gray-800 text-white rounded-lg"
           >
             Exportar JSON
           </button>
@@ -307,7 +348,7 @@ useEffect(() => {
           <button
             disabled={!emotionTools}
             onClick={() => emotionTools?.exportPDF()}
-            className="mt-2 px-4 py-2 bg-red-600 text-white w-full rounded-lg"
+            className="mt-2 w-full px-4 py-2 bg-red-600 text-white rounded-lg"
           >
             Exportar PDF
           </button>

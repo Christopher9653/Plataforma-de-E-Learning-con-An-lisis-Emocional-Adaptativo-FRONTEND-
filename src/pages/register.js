@@ -1,209 +1,186 @@
+"use client";
+
 import { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import Link from "next/link";
 import { AuthContext } from "@/context/AuthContext";
-import { Geist, Geist_Mono } from "next/font/google";
-
-// Fuentes opcionales
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Swal from "sweetalert2";
 
 export default function RegisterPage() {
-  const { login } = useContext(AuthContext); // usaremos login después del registro simulado
+  const { register, login } = useContext(AuthContext);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
-    name: "",
+    role: "estudiante",
+    fullname: "",
     email: "",
-    userType: "estudiante",
     password: "",
     confirmPassword: "",
-    acceptTerms: false,
+
+    // estudiante
+    username: "",
+    interseted_categories: "",
+
+    // docente
+    qualification: "",
+    mobile_no: "",
+    skills: "",
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      await Swal.fire("Error", "Las contrasenas no coinciden", "error");
       return;
     }
 
-    // Simulación de registro exitoso
-    const fakeUser = {
-      name: formData.name,
-      email: formData.email,
-      role: formData.userType === "estudiante" ? "estudiante" : "docente",
-    };
+    // 1) REGISTRO
+    const result = await register(formData);
 
-    // Simulación usando login() para guardarlo en el Context
-    login(fakeUser.email, formData.password);
-
-    // Redirección según rol
-    if (fakeUser.role === "docente") {
-      window.location.href = "/docente";
-    } else {
-      window.location.href = "/estudiante";
+    if (!result.success) {
+      await Swal.fire(
+        "Error",
+        result.message || "Error al registrar usuario",
+        "error"
+      );
+      return;
     }
+
+    // 2) AUTO LOGIN
+    const loginResult = await login(formData.email, formData.password);
+
+    if (!loginResult.success) {
+      await Swal.fire(
+        "Aviso",
+        "Registro exitoso, pero no se pudo iniciar sesion",
+        "warning"
+      );
+      return;
+    }
+
+    await Swal.fire("OK", "Registro y login exitoso", "success");
+
+    // 3) REDIRECCION
+    router.push(
+      loginResult.role === "docente"
+        ? "/dashboard/docente"
+        : "/dashboard/estudiante"
+    );
   };
 
   return (
     <MainLayout>
-      <div
-        className={`${geistSans.className} ${geistMono.variable} min-h-screen bg-gray-50 dark:bg-zinc-900 flex items-center justify-center py-12 px-4`}
-      >
-        <div className="max-w-md w-full space-y-8">
-          <div className="bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Crear Cuenta
-              </h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Únete a EduEmotion para una experiencia educativa adaptativa
-              </p>
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-center mb-4">Crear Cuenta</h2>
 
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-              {/* Nombre */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Nombre Completo
-                </label>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full p-3 rounded border"
+            >
+              <option value="estudiante">Estudiante</option>
+              <option value="docente">Docente</option>
+            </select>
+
+            <input
+              name="fullname"
+              placeholder="Nombre completo"
+              required
+              onChange={handleChange}
+              className="w-full p-3 rounded border"
+            />
+
+            <input
+              name="email"
+              type="email"
+              placeholder="Correo"
+              required
+              onChange={handleChange}
+              className="w-full p-3 rounded border"
+            />
+
+            <input
+              name="password"
+              type="password"
+              placeholder="Contrasena"
+              required
+              onChange={handleChange}
+              className="w-full p-3 rounded border"
+            />
+
+            <input
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirmar contrasena"
+              required
+              onChange={handleChange}
+              className="w-full p-3 rounded border"
+            />
+
+            {formData.role === "estudiante" && (
+              <>
                 <input
-                  type="text"
-                  name="name"
-                  required
-                  value={formData.name}
+                  name="username"
+                  placeholder="Usuario"
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
-                   dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
-                  placeholder="Tu nombre"
+                  className="w-full p-3 rounded border"
                 />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Correo Electrónico
-                </label>
                 <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
+                  name="interseted_categories"
+                  placeholder="Categorias de interes"
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
-                   dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
-                  placeholder="tu@email.com"
+                  className="w-full p-3 rounded border"
                 />
-              </div>
+              </>
+            )}
 
-              {/* Tipo de usuario */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Tipo de Usuario
-                </label>
-                <select
-                  name="userType"
-                  value={formData.userType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
-                   dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
-                >
-                  <option value="estudiante">Estudiante</option>
-                  <option value="docente">Docente</option>
-                </select>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Contraseña
-                </label>
+            {formData.role === "docente" && (
+              <>
                 <input
-                  type="password"
-                  name="password"
+                  name="qualification"
+                  placeholder="Titulo profesional"
                   required
-                  value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
-                   dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
-                  placeholder="Mínimo 8 caracteres"
+                  className="w-full p-3 rounded border"
                 />
-              </div>
-
-              {/* Confirm password */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Confirmar Contraseña
-                </label>
                 <input
-                  type="password"
-                  name="confirmPassword"
+                  name="mobile_no"
+                  placeholder="Telefono"
                   required
-                  value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
-                   dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
-                  placeholder="Repite tu contraseña"
+                  className="w-full p-3 rounded border"
                 />
-              </div>
-
-              {/* Aceptar términos */}
-              <div className="flex items-center">
                 <input
-                  type="checkbox"
-                  name="acceptTerms"
+                  name="skills"
+                  placeholder="Habilidades"
                   required
-                  checked={formData.acceptTerms}
                   onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="w-full p-3 rounded border"
                 />
-                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Acepto los{" "}
-                  <span className="text-blue-600 cursor-pointer">
-                    términos y condiciones
-                  </span>
-                </label>
-              </div>
+              </>
+            )}
 
-              {/* Botón registrar */}
-              <button
-                type="submit"
-                className="w-full py-3 px-4 text-sm font-medium rounded-lg text-white bg-blue-600 
-                 hover:bg-blue-700 transition"
-              >
-                Crear Cuenta
-              </button>
+            <button className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Crear cuenta
+            </button>
 
-              {/* Ya tengo cuenta */}
-              <div className="text-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  ¿Ya tienes una cuenta?{" "}
-                  <Link
-                    href="/login"
-                    className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-                  >
-                    Inicia sesión aquí
-                  </Link>
-                </span>
-              </div>
-            </form>
-          </div>
+            <p className="text-center text-sm">
+              Ya tienes cuenta?{" "}
+              <Link href="/login" className="text-blue-600">
+                Inicia sesion
+              </Link>
+            </p>
+          </form>
         </div>
       </div>
     </MainLayout>

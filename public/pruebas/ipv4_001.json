@@ -1,0 +1,134 @@
+{
+  "id_clase": "ipv4_001",
+  "titulo": "Prueba sobre Direccionamiento IPv4 y Subneteo",
+  "instrucciones": "Responde las siguientes preguntas basadas en la clase. Al finalizar podrás ver tu retroalimentación.",
+  "tiempo_limite_segundos": 180,
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "multiple_choice",
+      "pregunta": "¿Cuáles son las dos partes principales en una dirección IPv4?",
+      "opciones": [
+        { "id": "A", "texto": "Pública y Privada" },
+        { "id": "B", "texto": "MAC y Lógica" },
+        { "id": "C", "texto": "Red y Host" },
+        { "id": "D", "texto": "Origen y Destino" }
+      ],
+      "respuesta_correcta": "C",
+      "explicacion": "Una dirección IPv4 se divide en dos partes: porción de red y porción de host."
+    },
+    {
+      "id": 2,
+      "tipo": "true_false",
+      "pregunta": "La porción de red debe ser igual para todos los hosts de una red.",
+      "opciones": [
+        { "id": "A", "texto": "Verdadero" },
+        { "id": "B", "texto": "Falso" }
+      ],
+      "respuesta_correcta": "A",
+      "explicacion": "Todos los hosts de una red comparten la misma porción de red."
+    },
+    {
+      "id": 3,
+      "tipo": "multiple_choice",
+      "pregunta": "¿Qué herramienta indica qué parte de una IP es red y cuál es host?",
+      "opciones": [
+        { "id": "A", "texto": "Dirección MAC" },
+        { "id": "B", "texto": "Gateway" },
+        { "id": "C", "texto": "Máscara de subred" },
+        { "id": "D", "texto": "Protocolo TCP" }
+      ],
+      "respuesta_correcta": "C",
+      "explicacion": "La máscara de subred determina qué bits pertenecen a la red."
+    },
+    {
+      "id": 4,
+      "tipo": "multiple_choice",
+      "pregunta": "¿Cuántos bits de longitud tiene una máscara de subred, similar a una dirección IPv4?",
+      "opciones": [
+        { "id": "A", "texto": "8 bits" },
+        { "id": "B", "texto": "16 bits" },
+        { "id": "C", "texto": "32 bits" },
+        { "id": "D", "texto": "64 bits" }
+      ],
+      "respuesta_correcta": "C",
+      "explicacion": "Una máscara de subred IPv4 tiene siempre 32 bits."
+    },
+    {
+      "id": 5,
+      "tipo": "multiple_choice",
+      "pregunta": "Cuando una máscara de subred se compara bit a bit con una dirección IP, ¿qué representan los 'unos' en la máscara?",
+      "opciones": [
+        { "id": "A", "texto": "La porción del host" },
+        { "id": "B", "texto": "La porción de la red" },
+        { "id": "C", "texto": "La dirección de broadcast" },
+        { "id": "D", "texto": "Un bit no utilizado" }
+      ],
+      "respuesta_correcta": "B",
+      "explicacion": "Los bits en 1 indican qué parte de la dirección pertenece a la red."
+    },
+    {
+      "id": 6,
+      "tipo": "multiple_choice",
+      "pregunta": "Cuando una máscara de subred se compara con una dirección IP, ¿qué representan los ceros?",
+      "opciones": [
+        { "id": "A", "texto": "La porción del host" },
+        { "id": "B", "texto": "La porción de la red" },
+        { "id": "C", "texto": "La dirección de loopback" },
+        { "id": "D", "texto": "Un bit reservado" }
+      ],
+      "respuesta_correcta": "A",
+      "explicacion": "Los bits en 0 representan la parte del host."
+    },
+    {
+      "id": 7,
+      "tipo": "true_false",
+      "pregunta": "La máscara de subred muestra exactamente dónde se divide red y host.",
+      "opciones": [
+        { "id": "A", "texto": "Verdadero" },
+        { "id": "B", "texto": "Falso" }
+      ],
+      "respuesta_correcta": "A",
+      "explicacion": "La máscara de subred indica la separación exacta entre red y host."
+    },
+    {
+      "id": 8,
+      "tipo": "multiple_choice",
+      "pregunta": "Con una IP 192.168.123.132 y máscara /24, ¿cuántos bits son de red?",
+      "opciones": [
+        { "id": "A", "texto": "8 bits" },
+        { "id": "B", "texto": "16 bits" },
+        { "id": "C", "texto": "24 bits" },
+        { "id": "D", "texto": "32 bits" }
+      ],
+      "respuesta_correcta": "C",
+      "explicacion": "Una máscara /24 significa 24 bits destinados a la red."
+    },
+    {
+      "id": 9,
+      "tipo": "multiple_choice",
+      "pregunta": "Con IP 192.168.123.132 (/24), ¿cuál es la dirección de red?",
+      "opciones": [
+        { "id": "A", "texto": "192.168.123.132" },
+        { "id": "B", "texto": "192.168.123.0" },
+        { "id": "C", "texto": "0.0.0.132" },
+        { "id": "D", "texto": "255.255.255.0" }
+      ],
+      "respuesta_correcta": "B",
+      "explicacion": "Con máscara /24, la dirección de red es 192.168.123.0."
+    },
+    {
+      "id": 10,
+      "tipo": "multiple_choice",
+      "pregunta": "Con la misma IP y máscara /24, ¿cuál es la porción de host?",
+      "opciones": [
+        { "id": "A", "texto": "192.168.123" },
+        { "id": "B", "texto": "132" },
+        { "id": "C", "texto": "0" },
+        { "id": "D", "texto": "255" }
+      ],
+      "respuesta_correcta": "B",
+      "explicacion": "La porción de host es el último octeto: 132."
+    }
+  ]
+}

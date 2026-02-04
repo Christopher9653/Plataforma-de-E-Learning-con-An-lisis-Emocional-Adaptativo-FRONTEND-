@@ -1,11 +1,13 @@
 import "@/styles/globals.css";
 
 import AuthProvider from "@/context/AuthContext";
-
+import { EmotionProvider } from "@/context/EmotionContext";
 export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
-      <Component {...pageProps} />
+      <EmotionProvider>
+        <Component {...pageProps} />
+      </EmotionProvider>
     </AuthProvider>
   );
 }

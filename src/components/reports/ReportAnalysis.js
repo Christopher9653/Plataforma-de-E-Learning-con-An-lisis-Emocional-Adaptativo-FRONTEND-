@@ -1,5 +1,5 @@
 import EmotionRadarChart from "@/components/charts/EmotionRadarChart";
-import AttentionChart from "@/components/charts/AttentionChart";
+import AttentionChart from "@/components/charts/AttentionCharts";
 
 export default function ReportAnalysis({ data }) {
   return (

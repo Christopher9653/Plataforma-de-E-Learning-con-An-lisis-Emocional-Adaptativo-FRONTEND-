@@ -12,44 +12,42 @@ export default function NavbarAuth() {
       { name: "Usuarios", href: "/admin/usuarios" },
       { name: "Cursos", href: "/admin/cursos" },
       { name: "Reportes", href: "/admin/reportes" },
-      {name: "Estadisticas", href: "/admin/estadisticas" },
-      {name: "Perfil", href: "/perfil" },
+      { name: "Estadisticas", href: "/admin/estadisticas" },
+      { name: "Perfil", href: "/perfil" },
     ],
     docente: [
-      { name: "Dashboard", href: "/docente" },
-      { name: "Clases", href: "/docente/clases" },
-      { name: "Seguimiento", href: "/docente/estudiantes" },
-      { name: "Reportes", href: "/docente/reportes" },
-      {name: "Perfil", href: "/perfil" },
+      { name: "Dashboard", href: "/dashboard/docente" },
+      { name: "Clases", href: "/dashboard/docente/clases" },
+      { name: "Seguimiento", href: "/dashboard/docente/estudiantes" },
+      { name: "Quizzes", href: "/dashboard/docente/quizzes" },
+      { name: "Perfil", href: "/dashboard/docente/perfil" },
     ],
     estudiante: [
-      { name: "Dashboard", href: "/estudiante" },
-      { name: "Mis Clases", href: "/estudiante/clases" },
-      { name: "Mi Progreso", href: "/estudiante/mi-progreso" },
-      { name: "Inscripciones", href: "/estudiante/inscripciones" },
-      {name: "Perfil", href: "/perfil" },
+      { name: "Dashboard", href: "/dashboard/estudiante" },
+      { name: "Mis cursos", href: "/dashboard/estudiante/cursos" },
+      { name: "Inscripciones", href: "/dashboard/estudiante/inscripciones" },
+      { name: "Perfil", href: "/dashboard/estudiante/perfil" },
+      { name: "Mi progreso", href: "/dashboard/estudiante/progreso" },
+
     ],
   };
 
   return (
     <nav className="bg-blue-700 text-white px-6 py-4 flex justify-between items-center shadow-md">
-      
-          {/* LOGO */}
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/logo.png"    // 🔥 coloca tu logo en /public/logo.png
-            alt="EduEmotion Logo"
-            width={40}
-            height={40}
-            className="rounded-lg"
-          />
-          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            EduEmotion
-          </span>
-        </Link>
-        
+      {/* LOGO */}
+      <Link href="/" className="flex items-center gap-3">
+        <Image
+          src="/logo.png" // 🔥 coloca tu logo en /public/logo.png
+          alt="EduEmotion Logo"
+          width={40}
+          height={40}
+          className="rounded-lg"
+        />
+        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          EduEmotion
+        </span>
+      </Link>
       <h1 className="text-xl font-bold">EduEmotion</h1>
-        
       <div className="flex space-x-6 items-center">
         {linksByRole[user?.role]?.map((link) => (
           <Link key={link.href} href={link.href}>
@@ -58,11 +56,9 @@ export default function NavbarAuth() {
             </span>
           </Link>
         ))}
-
         <button
           onClick={logout}
-          className="bg-white text-blue-600  hover:bg-red-400 hover:text-white transition px-4 py-2 rounded-md"
-          
+          className="bg-white text-blue-600 hover:bg-red-400 hover:text-white transition px-4 py-2 rounded-md"
         >
           Cerrar Sesión
         </button>
