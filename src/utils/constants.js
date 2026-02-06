@@ -1,7 +1,7 @@
 // ===============================
 // API
 // ===============================
-export const API_BASE = "http://localhost:8000/api";
+export const API_BASE = "https://edumotion-backend1.onrender.com";
 
 // ===============================
 // ROLES

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export const AuthContext = createContext();
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "https://edumotion-backend1.onrender.com";
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

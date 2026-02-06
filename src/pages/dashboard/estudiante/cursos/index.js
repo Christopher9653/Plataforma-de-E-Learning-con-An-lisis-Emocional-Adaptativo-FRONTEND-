@@ -6,7 +6,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "https://edumotion-backend1.onrender.com";
 
 export default function EstudianteCursos() {
   const { user } = useContext(AuthContext);

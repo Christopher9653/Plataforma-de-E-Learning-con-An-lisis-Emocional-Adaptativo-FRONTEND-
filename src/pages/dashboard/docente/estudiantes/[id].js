@@ -26,7 +26,7 @@ export default function EstudianteDetalle() {
     if (!id) return;
     const fetchStudent = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/student/${id}/`);
+        const res = await fetch(`https://edumotion-backend1.onrender.com/student/${id}/`);
         if (!res.ok) return;
         const data = await res.json();
         setStudentName(data.fullname || data.username || "");

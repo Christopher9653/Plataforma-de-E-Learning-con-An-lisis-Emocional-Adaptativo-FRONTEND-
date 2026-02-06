@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
 
-const API = "http://localhost:8000/api";
+const API = "https://edumotion-backend1.onrender.com";
 
 export default function PasoCurso({ onNext, setCourseId }) {
   const { user } = useAuth("docente");

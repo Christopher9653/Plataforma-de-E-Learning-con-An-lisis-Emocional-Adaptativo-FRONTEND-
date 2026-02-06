@@ -9,7 +9,7 @@ import { AuthContext } from "@/context/AuthContext";
 import PasoModulos from "./crear-clase/PasoModulos";
 import PasoClases from "./crear-clase/PasoClases";
 
-const API = "http://localhost:8000/api";
+const API = "https://edumotion-backend1.onrender.com";
 
 export default function CursoDetalleDocente() {
   const router = useRouter();

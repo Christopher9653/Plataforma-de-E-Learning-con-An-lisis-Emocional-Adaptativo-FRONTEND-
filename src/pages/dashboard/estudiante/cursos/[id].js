@@ -7,7 +7,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
 import ClassVideoPlayer from "@/components/clases/ClassVideoPlayer";
 
-const API = "http://localhost:8000/api";
+const API = "https://edumotion-backend1.onrender.com";
 
 export default function CursoReproductor() {
   const router = useRouter();
