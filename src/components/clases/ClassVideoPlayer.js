@@ -199,7 +199,7 @@ const generarPrueba = async () => {
     // ✅ Guardar en contexto global
     setEmotionReport(report);
 
-    const res = await fetch("https://edumotion-backend1.onrender.com/apigenerate-test-attempt/", {
+    const res = await fetch("https://edumotion-backend1.onrender.com/api/generate-test-attempt/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -19,7 +19,7 @@ export default function Estudiantes() {
           return;
         }
         const res = await fetch(
-          `https://edumotion-backend1.onrender.com/apifetch-enrolled-students/${course}`
+          `https://edumotion-backend1.onrender.com/api/fetch-enrolled-students/${course}`
         );
         const data = await res.json();
         const list = Array.isArray(data) ? data : data.results || [];

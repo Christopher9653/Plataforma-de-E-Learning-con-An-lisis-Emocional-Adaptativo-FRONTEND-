@@ -26,7 +26,7 @@ export default function DocenteClases() {
     const fetchCursos = async () => {
       try {
         const res = await fetch(
-          `https://edumotion-backend1.onrender.com/apiteacher-course/${user.id}`
+          `https://edumotion-backend1.onrender.com/api/teacher-course/${user.id}`
         );
 
         if (!res.ok) {
