@@ -1,7 +1,9 @@
 // ===============================
 // API
 // ===============================
-export const API_BASE = "https://edumotion-backend1.onrender.com/api";
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE ||
+  "https://edumotion-backend1.onrender.com/api";
 
 // ===============================
 // ROLES
