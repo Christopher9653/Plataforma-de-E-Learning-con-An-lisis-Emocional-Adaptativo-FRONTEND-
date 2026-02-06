@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
-const API = "https://edumotion-backend1.onrender.com";
+const API = "https://edumotion-backend1.onrender.com/api/";
 
 export default function PasoClases({ courseId, modulos, onFinish }) {
   const router = useRouter();

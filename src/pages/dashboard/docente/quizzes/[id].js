@@ -6,7 +6,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
 
-const API = "https://edumotion-backend1.onrender.com";
+const API = "https://edumotion-backend1.onrender.com/api/";
 
 export default function ConfigurarQuizDocente() {
   const router = useRouter();

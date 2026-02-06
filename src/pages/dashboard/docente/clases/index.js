@@ -6,7 +6,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 
-const API_BASE = "https://edumotion-backend1.onrender.com";
+const API_BASE = "https://edumotion-backend1.onrender.com/api/";
 
 export default function DocenteClases() {
   const { user } = useContext(AuthContext);
@@ -26,7 +26,7 @@ export default function DocenteClases() {
     const fetchCursos = async () => {
       try {
         const res = await fetch(
-          `https://edumotion-backend1.onrender.com/teacher-course/${user.id}`
+          `https://edumotion-backend1.onrender.com/api/teacher-course/${user.id}`
         );
 
         if (!res.ok) {

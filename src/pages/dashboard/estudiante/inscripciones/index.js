@@ -7,7 +7,7 @@ import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import Swal from "sweetalert2";
 
-const API = "https://edumotion-backend1.onrender.com";
+const API = "https://edumotion-backend1.onrender.com/api/";
 
 export default function InscribirseCursos() {
   const { user } = useContext(AuthContext);

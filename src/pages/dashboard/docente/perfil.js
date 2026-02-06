@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import MainLayout from "@/components/layout/MainLayout";
 import useAuth from "@/hooks/useAuth";
 
-const API_BASE = "https://edumotion-backend1.onrender.com";
+const API_BASE = "https://edumotion-backend1.onrender.com/api/";
 
 export default function PerfilDocente() {
   const { user, loading: authLoading } = useAuth("docente");

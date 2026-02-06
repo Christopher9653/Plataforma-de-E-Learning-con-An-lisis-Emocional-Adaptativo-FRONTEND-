@@ -217,20 +217,14 @@ export default function RegisterPage() {
                   className="w-full p-3 rounded border"
                 />
                 <input
-                  name="mobile_no"
-                  type="tel"
-                  placeholder="Telefono"
-                  required
-                  inputMode="numeric"
-                  pattern="\\d{10}"
-                  maxLength={10}
-                  title="Ingrese exactamente 10 digitos"
-                  onChange={handleChange}
-                  className="w-full p-3 rounded border"
-                />
-                <p className="text-xs text-gray-600">
-                  Longitud de telefono: {formData.mobile_no.length}/10
-                </p>
+                    name="mobile_no"
+                    type="tel"
+                    placeholder="Telefono"
+                    required
+                    inputMode="numeric"
+                    onChange={handleChange}
+                    className="w-full p-3 rounded border"
+                  />
                 <input
                   name="skills"
                   placeholder="Habilidades"
