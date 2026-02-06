@@ -5,7 +5,7 @@ import useAuth from "@/hooks/useAuth";
 import { AuthContext } from "@/context/AuthContext";
 import ClassList from "@/components/clases/ClassList";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function DocenteDashboard() {
   const { user } = useAuth("docente");

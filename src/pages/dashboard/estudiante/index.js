@@ -7,7 +7,7 @@ import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function EstudianteDashboard() {
   const { user } = useContext(AuthContext);

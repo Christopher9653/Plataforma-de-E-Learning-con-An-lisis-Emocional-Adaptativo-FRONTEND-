@@ -7,7 +7,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
 import ReportAnalysis from "@/components/reports/ReportAnalysis";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function ProgresoEstudiante() {
   const { user } = useContext(AuthContext);

@@ -8,7 +8,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useEmotion } from "@/context/EmotionContext";
 import jsPDF from "jspdf";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function ResolverQuizEstudiante() {
   const router = useRouter();

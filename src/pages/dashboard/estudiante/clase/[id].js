@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import AuthGuard from "@/components/auth/AuthGuard";
 import ClassVideoPlayer from "@/components/clases/ClassVideoPlayer";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function ReproductorClase() {
   const router = useRouter();

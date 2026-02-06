@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import MainLayout from "@/components/layout/MainLayout";
 import { AuthContext } from "@/context/AuthContext";
 
-const API = "https://edumotion-backend1.onrender.com/api/";
+const API = "https://edumotion-backend1.onrender.com/api";
 
 export default function DocenteQuizzes() {
   const { user } = useContext(AuthContext);
