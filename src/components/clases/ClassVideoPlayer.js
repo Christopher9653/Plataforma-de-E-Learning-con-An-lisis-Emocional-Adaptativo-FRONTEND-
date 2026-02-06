@@ -14,6 +14,7 @@ export default function ClassVideoPlayer({ curso }) {
   const [videoActual, setVideoActual] = useState(null);
   const [modulosAbiertos, setModulosAbiertos] = useState({});
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
 
   // MORPHCAST
   const [accepted, setAccepted] = useState(false);
@@ -76,6 +77,7 @@ export default function ClassVideoPlayer({ curso }) {
     setStopEmotion(true);
     setTimeout(() => setStopEmotion(false), 200);
     setVideoPlaying(false);
+    setVideoEnded(false);
   };
 
   // ================================
@@ -141,6 +143,7 @@ export default function ClassVideoPlayer({ curso }) {
     setAccepted(false);
     setEmotionTools(null);
     setStopEmotion(true);
+    setVideoEnded(false);
   };
 
   // ================================
@@ -155,14 +158,41 @@ export default function ClassVideoPlayer({ curso }) {
   };
 
   // ================================
+  // GUARDAR REPORTE EMOCIONAL (LOCAL)
+  // ================================
+  const guardarReporteEmocional = (report) => {
+    if (!report || !curso?.id || !videoActual?.id) return;
+
+    const progreso = JSON.parse(localStorage.getItem("progresoCursos")) || {};
+    const cursoId = curso.id;
+    const claseId = videoActual.id;
+
+    const current = progreso[cursoId] || {};
+    const emociones = current.emociones || {};
+
+    emociones[claseId] = {
+      titulo: videoActual.titulo,
+      fecha: new Date().toISOString(),
+      resumen: report.resumen,
+      metadata: report.metadata,
+      datos: report.datos,
+    };
+
+    progreso[cursoId] = { ...current, emociones };
+    localStorage.setItem("progresoCursos", JSON.stringify(progreso));
+  };
+
+  // ================================
   // Generador de Prueba
   // ================================
 const generarPrueba = async () => {
   try {
+    setEnviandoPrueba(true);
     const report = emotionTools?.getReport();
      if (!report) {
     alert("No se ha generado el reporte emocional.");
     console.log("No se ha ggenerado: ",report);
+    setEnviandoPrueba(false);
     return;
   }
 
@@ -192,6 +222,8 @@ const generarPrueba = async () => {
   } catch (err) {
     console.error("Error al generar prueba:", err.message);
     alert("No se pudo generar la prueba");
+  } finally {
+    setEnviandoPrueba(false);
   }
 };
 
@@ -279,10 +311,19 @@ const generarPrueba = async () => {
               key={videoActual.videoUrl}
               className="w-full h-full object-contain bg-black"
               controls={false}
-              onPlay={() => setVideoPlaying(true)}
+              onPlay={() => {
+                setVideoPlaying(true);
+                setVideoEnded(false);
+              }}
               onEnded={() => {
                 setVideoPlaying(false);
+                setVideoEnded(true);
                 setStopEmotion(true);
+                const report = emotionTools?.getReport();
+                if (report) {
+                  guardarReporteEmocional(report);
+                  setEmotionReport(report);
+                }
 
                 if (videoActual.id_prueba) {
                   router.push(`/estudiante/pruebas/${videoActual.id_prueba}`);
@@ -299,15 +340,25 @@ const generarPrueba = async () => {
 
           <button
             onClick={generarPrueba}
-            disabled={!emotionTools || enviandoPrueba}
+            disabled={!emotionTools || enviandoPrueba || !videoEnded}
             className={`mt-4 px-6 py-2 rounded-lg text-white ${
-              !emotionTools || enviandoPrueba
+              !emotionTools || enviandoPrueba || !videoEnded
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-green-600 hover:bg-green-700"
             }`}
           >
             {enviandoPrueba ? "Generando..." : "Generar prueba"}
           </button>
+          {accepted && videoPlaying && !videoEnded && (
+            <p className="mt-2 text-sm text-gray-300">
+              Debes terminar la clase para generar la prueba.
+            </p>
+          )}
+          {enviandoPrueba && (
+            <div className="mt-3 w-[320px] h-2 bg-gray-200 rounded overflow-hidden">
+              <div className="h-full bg-green-600 animate-pulse" />
+            </div>
+          )}
         </div>
 
         {/* SIDEBAR */}

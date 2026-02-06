@@ -12,9 +12,11 @@ export default function PasoCurso({ onNext, setCourseId }) {
     title: "",
     description: "",
     techs: "",
+    featured_img: null,
   });
 
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   // 🔐 Header de autenticación
   const authHeader = {
@@ -26,6 +28,18 @@ export default function PasoCurso({ onNext, setCourseId }) {
       ...curso,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setCurso({
+      ...curso,
+      featured_img: file,
+    });
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -41,7 +55,9 @@ export default function PasoCurso({ onNext, setCourseId }) {
       fd.append("techs", curso.techs);
       fd.append("category", 5);              // ✅ FIJO
       fd.append("teacher", user.id);          // ✅ OBLIGATORIO
-      fd.append("featured_img", "");          // ✅ null / vacío
+      if (curso.featured_img) {
+        fd.append("featured_img", curso.featured_img);
+      }
 
       const res = await fetch(`${API}/course/`, {
         method: "POST",
@@ -106,6 +122,25 @@ export default function PasoCurso({ onNext, setCourseId }) {
         onChange={handleChange}
         className="w-full mb-6 p-3 border rounded focus:outline-none focus:ring"
       />
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-600 mb-2">
+          Imagen del curso
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="w-full p-2 border rounded"
+        />
+        {previewUrl && (
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="mt-3 w-full max-w-sm rounded border object-cover"
+          />
+        )}
+      </div>
 
       <button
         disabled={loading}

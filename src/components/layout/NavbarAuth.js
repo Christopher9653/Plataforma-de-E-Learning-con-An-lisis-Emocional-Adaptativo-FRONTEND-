@@ -18,8 +18,7 @@ export default function NavbarAuth() {
     docente: [
       { name: "Dashboard", href: "/dashboard/docente" },
       { name: "Clases", href: "/dashboard/docente/clases" },
-      { name: "Seguimiento", href: "/dashboard/docente/estudiantes" },
-      { name: "Quizzes", href: "/dashboard/docente/quizzes" },
+      { name: "Reportes", href: "/dashboard/docente/reportes" },
       { name: "Perfil", href: "/dashboard/docente/perfil" },
     ],
     estudiante: [

@@ -14,6 +14,8 @@ export default function PerfilEstudiante() {
 
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [enrolledCount, setEnrolledCount] = useState(0);
+  const [emotionSummary, setEmotionSummary] = useState(null);
 
   // ===============================
   // CARGAR PERFIL DESDE BACKEND
@@ -28,6 +30,32 @@ export default function PerfilEstudiante() {
 
         const data = await res.json();
         setPerfil(data);
+
+        // Cursos inscritos
+        const resCursos = await fetch(`${API}/fetch-enrolled-courses/${user.id}`);
+        if (resCursos.ok) {
+          const cursosData = await resCursos.json();
+          setEnrolledCount(Array.isArray(cursosData) ? cursosData.length : 0);
+        }
+
+        // Resumen emocional desde localStorage
+        const progresoLocal =
+          JSON.parse(localStorage.getItem("progresoCursos")) || {};
+        const emociones = progresoLocal?.[data.id]?.emociones || {};
+        const todas = Object.values(emociones)
+          .map((r) => r?.resumen?.emocion_predominante)
+          .filter(Boolean);
+        if (todas.length > 0) {
+          const counts = {};
+          todas.forEach((e) => {
+            counts[e] = (counts[e] || 0) + 1;
+          });
+          const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+          setEmotionSummary({
+            predominante: top,
+            totalReportes: todas.length,
+          });
+        }
       } catch (err) {
         console.error("Perfil estudiante:", err);
       } finally {
@@ -58,7 +86,7 @@ export default function PerfilEstudiante() {
     );
   }
 
-  const profilePhoto = perfil.photo || null;
+  const profilePhoto = perfil.profile_img || perfil.photo || null;
 
   return (
     <AuthGuard role="estudiante">
@@ -73,6 +101,28 @@ export default function PerfilEstudiante() {
             <p className="text-gray-600 mt-1">
               Información personal de tu cuenta
             </p>
+          </div>
+
+          {/* RESUMEN */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-white p-5 rounded-xl shadow">
+              <p className="text-sm text-gray-500">Cursos inscritos</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {enrolledCount}
+              </p>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow">
+              <p className="text-sm text-gray-500">Reportes emocionales</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {emotionSummary?.totalReportes || 0}
+              </p>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow">
+              <p className="text-sm text-gray-500">Emoción predominante</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {emotionSummary?.predominante || "Sin datos"}
+              </p>
+            </div>
           </div>
 
           {/* TARJETA PERFIL */}

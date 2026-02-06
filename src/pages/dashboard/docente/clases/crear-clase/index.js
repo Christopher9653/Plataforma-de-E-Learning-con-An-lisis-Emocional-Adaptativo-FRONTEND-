@@ -5,6 +5,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import PasoCurso from "./PasoCurso";
 import PasoModulos from "./PasoModulos";
 import PasoClases from "./PasoClases";
+import Link from "next/link";
 
 export default function CrearClase() {
   const [step, setStep] = useState(1);
@@ -14,6 +15,14 @@ export default function CrearClase() {
   return (
     <MainLayout>
       <div className="p-10 bg-gray-100 min-h-screen">
+        <div className="mb-6">
+          <Link
+            href="/dashboard/docente/clases"
+            className="inline-block px-4 py-2 rounded border text-sm hover:bg-white"
+          >
+            Volver a clases
+          </Link>
+        </div>
         {step === 1 && (
           <PasoCurso
             setCourseId={setCourseId}

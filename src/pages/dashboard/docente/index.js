@@ -12,24 +12,25 @@ export default function DocenteDashboard() {
   const { token } = useContext(AuthContext);
 
   const [misClases, setMisClases] = useState([]);
+  const [totalEstudiantes, setTotalEstudiantes] = useState(0);
+  const [teacherName, setTeacherName] = useState("");
   const [loading, setLoading] = useState(true);
 
   /* =============================
       OBTENER CLASES DEL DOCENTE
   ============================== */
   useEffect(() => {
-    if (!user || !token) return;
+    if (!user) return;
 
     const fetchClases = async () => {
       try {
-        const res = await fetch(
-          `${API}/course/?teacher=${user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const teacherRes = await fetch(`${API}/teacher/${user.id}/`);
+        if (teacherRes.ok) {
+          const teacherData = await teacherRes.json();
+          setTeacherName(teacherData.fullname || teacherData.full_name || "");
+        }
+
+        const res = await fetch(`${API}/teacher-course/${user.id}`);
 
         if (!res.ok) throw new Error("Error al obtener clases");
 
@@ -41,16 +42,25 @@ export default function DocenteDashboard() {
           [];
 
         setMisClases(clases);
+
+        const resStudents = await fetch(
+          `${API}/fetch-all-enrolled-students/${user.id}`
+        );
+        if (resStudents.ok) {
+          const studentsData = await resStudents.json();
+          setTotalEstudiantes(Array.isArray(studentsData) ? studentsData.length : 0);
+        }
       } catch (error) {
         console.error("Dashboard docente:", error);
         setMisClases([]);
+        setTotalEstudiantes(0);
       } finally {
         setLoading(false);
       }
     };
 
     fetchClases();
-  }, [user, token]);
+  }, [user]);
 
   /* =============================
       MÉTRICAS (ROBUSTAS)
@@ -62,7 +72,7 @@ export default function DocenteDashboard() {
   );
 
   // Total estudiantes (soporta distintos nombres)
-  const totalEstudiantes = misClases.reduce((acc, c) => {
+  const totalEstudiantesFallback = misClases.reduce((acc, c) => {
     return (
       acc +
       (c.students_count ||
@@ -79,7 +89,7 @@ export default function DocenteDashboard() {
         {/* ===== ENCABEZADO ===== */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
-            Bienvenido, {user?.name || "Docente"}
+            Bienvenido, {teacherName || user?.fullname || user?.full_name || user?.name || "Docente"}
           </h1>
           <p className="text-gray-600 mt-1">
             Gestiona tus cursos, estudiantes y contenido académico.
@@ -101,7 +111,7 @@ export default function DocenteDashboard() {
 
             <div className="text-center">
               <p className="text-3xl font-bold text-green-600">
-                {totalEstudiantes}
+                {totalEstudiantes || totalEstudiantesFallback}
               </p>
               <p className="text-gray-600 mt-1">
                 Estudiantes Inscritos
@@ -153,22 +163,69 @@ export default function DocenteDashboard() {
           </div>
         </div>
 
-        {/* ===== LISTA DE CLASES (MISMO DISEÑO QUE /CLASES) ===== */}
+        {/* ===== LISTA DE CURSOS (MISMO DISEÑO QUE /DOCENTE/CLASES) ===== */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Mis Clases
+            Mis Cursos
           </h2>
 
           {loading ? (
             <p className="text-gray-500">
-              Cargando clases...
+              Cargando cursos...
             </p>
           ) : misClases.length === 0 ? (
             <p className="text-gray-500">
-              Aún no tienes clases creadas.
+              Aún no tienes cursos creados.
             </p>
           ) : (
-            <ClassList classes={misClases} />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {misClases.map((curso) => (
+                <Link
+                  key={curso.id}
+                  href={`/dashboard/docente/clases/${curso.id}`}
+                  className="group block bg-white rounded-xl border hover:shadow-lg transition overflow-hidden"
+                >
+                  <div className="h-40 bg-gray-200 overflow-hidden">
+                    {curso.featured_img ? (
+                      <img
+                        src={curso.featured_img}
+                        alt={curso.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <span className="text-white font-semibold text-lg text-center px-4">
+                          {curso.title}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-2">
+                      {curso.title}
+                    </h3>
+
+                    <p className="text-gray-600 text-sm line-clamp-3 mt-2 mb-4">
+                      {curso.description || "Este curso no tiene descripción."}
+                    </p>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                      <span>
+                        👥 {curso.total_enrolled_students || 0} estudiantes
+                      </span>
+                      <span>
+                        📚 {curso.course_modules?.length || 0} módulos
+                      </span>
+                    </div>
+
+                    <span className="inline-block text-sm font-medium text-blue-600 group-hover:underline">
+                      Administrar curso →
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           )}
         </div>
 

@@ -191,34 +191,36 @@ export default function CursoDetalleDocente() {
           {/* MÓDULOS */}
           {modulos.map((mod) => (
             <div key={mod.id} className="mb-10 bg-white p-6 rounded shadow">
-              <div className="flex justify-between mb-3">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
                 <div>
                   <h2 className="text-xl font-semibold">{mod.title}</h2>
                   <p className="text-gray-600 text-sm">{mod.description}</p>
                 </div>
 
-                <button
-                  onClick={() => eliminarModulo(mod.id)}
-                  className="text-red-600 text-sm hover:underline"
-                >
-                  Eliminar módulo
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => eliminarModulo(mod.id)}
+                    className="px-3 py-1.5 text-sm rounded border border-red-200 text-red-700 hover:bg-red-50"
+                  >
+                    Eliminar módulo
+                  </button>
+                </div>
               </div>
 
               {/* CLASES */}
               <div className="space-y-6">
                 {videosPorModulo[mod.id]?.map((clase) => (
                   <div key={clase.id} className="border p-4 rounded">
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-2">
                       <h3 className="font-semibold">{clase.title}</h3>
 
-                      <div className="flex gap-4 text-sm">
+                      <div className="flex flex-wrap gap-2 text-sm">
                         <button
                           onClick={() => {
                             setEditandoVideo(clase.id);
                             setNuevoTitulo(clase.title);
                           }}
-                          className="text-blue-600"
+                          className="px-3 py-1.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
                         >
                           Editar
                         </button>
@@ -229,7 +231,7 @@ export default function CursoDetalleDocente() {
                               `/dashboard/docente/quizzes/intentos?chapter=${clase.id}`
                             )
                           }
-                          className="text-green-600"
+                          className="px-3 py-1.5 rounded bg-green-50 text-green-700 hover:bg-green-100"
                         >
                           Intentos
                         </button>
@@ -240,7 +242,7 @@ export default function CursoDetalleDocente() {
                               `/dashboard/docente/quizzes/calificar?chapter=${clase.id}`
                             )
                           }
-                          className="text-purple-600"
+                          className="px-3 py-1.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100"
                         >
                           Calificar
                         </button>
@@ -251,7 +253,7 @@ export default function CursoDetalleDocente() {
                               `/dashboard/docente/quizzes/${clase.id}`
                             )
                           }
-                          className="text-indigo-600"
+                          className="px-3 py-1.5 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
                         >
                           Config. Quizz
                         </button>
@@ -267,7 +269,7 @@ export default function CursoDetalleDocente() {
                         />
                         <button
                           onClick={() => guardarTituloVideo(clase.id)}
-                          className="bg-blue-600 text-white px-3 rounded"
+                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                         >
                           Guardar
                         </button>

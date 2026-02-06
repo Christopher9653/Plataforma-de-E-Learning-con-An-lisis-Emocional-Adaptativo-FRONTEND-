@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
+import jsPDF from "jspdf";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layout/MainLayout";
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -16,6 +17,8 @@ export default function IntentosDocente() {
 
   const [intentos, setIntentos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
   // ===============================
   // FETCH INTENTOS
@@ -77,81 +80,138 @@ export default function IntentosDocente() {
             </p>
           </div>
 
-          {/* TABLA */}
+          {/* LISTA */}
           {intentos.length === 0 ? (
             <div className="bg-white p-6 rounded shadow text-gray-500">
               No existen intentos registrados.
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 text-gray-700">
-                  <tr>
-                    <th className="p-3 text-left">Estudiante</th>
-                    <th className="p-3 text-left">Fecha</th>
-                    <th className="p-3 text-center">Puntaje</th>
-                    <th className="p-3 text-center">Estado</th>
-                    <th className="p-3 text-center">Acciones</th>
-                  </tr>
-                </thead>
+            <div className="space-y-4">
+              {intentos.map((i) => {
+                const feedback =
+                  i.grade_result ||
+                  i.generated_test ||
+                  i.emotional_report ||
+                  "Sin retroalimentación.";
 
-                <tbody>
-                  {intentos.map((i) => (
-                    <tr
-                      key={i.id}
-                      className="border-t hover:bg-gray-50"
-                    >
-                      <td className="p-3">
-                        {i.student_name || `ID ${i.student}`}
-                      </td>
+                const descargarPDF = () => {
+                  const pdf = new jsPDF("p", "mm", "a4");
+                  const W = pdf.internal.pageSize.getWidth();
+                  const H = pdf.internal.pageSize.getHeight();
 
-                      <td className="p-3">
-                        {new Date(i.created_at).toLocaleString()}
-                      </td>
+                  pdf.setFontSize(18);
+                  pdf.text("Retroalimentación IA", W / 2, 20, { align: "center" });
+                  pdf.setFontSize(12);
+                  pdf.text(`Estudiante: ${i.student_name || `ID ${i.student}`}`, 10, 32);
+                  pdf.text(
+                    `Fecha: ${new Date(i.created_at).toLocaleString()}`,
+                    10,
+                    40
+                  );
 
-                      <td className="p-3 text-center">
-                        {i.score ?? "—"}
-                      </td>
+                  pdf.setFontSize(11);
+                  const marginX = 10;
+                  const startY = 52;
+                  const lineHeight = 6;
+                  const maxWidth = W - marginX * 2;
+                  const lines = pdf.splitTextToSize(String(feedback), maxWidth);
 
-                      <td className="p-3 text-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium
-                            ${
-                              i.passed
-                                ? "bg-green-100 text-green-700"
-                                : i.finished
-                                ? "bg-red-100 text-red-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
+                  let y = startY;
+                  lines.forEach((line) => {
+                    if (y > H - 15) {
+                      pdf.addPage();
+                      y = 20;
+                    }
+                    pdf.text(line, marginX, y);
+                    y += lineHeight;
+                  });
+
+                  pdf.save(`retroalimentacion_${i.student || i.id}.pdf`);
+                };
+
+                return (
+                  <div key={i.id} className="bg-white rounded-xl shadow p-5">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-gray-500">Estudiante</p>
+                        <p className="font-semibold text-gray-800">
+                          {i.student_name || `ID ${i.student}`}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(i.created_at).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={descargarPDF}
+                          className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
                         >
-                          {i.passed
-                            ? "Aprobado"
-                            : i.finished
-                            ? "Reprobado"
-                            : "Pendiente"}
-                        </span>
-                      </td>
-
-                      <td className="p-3 text-center">
+                          Descargar PDF
+                        </button>
                         <button
                           onClick={() =>
-                            router.push(
-                              `/dashboard/docente/quizzes/calificar?id=${i.id}`
-                            )
+                            (setModalData({
+                              estudiante: i.student_name || `ID ${i.student}`,
+                              fecha: i.created_at,
+                              feedback,
+                            }), setModalOpen(true))
                           }
-                          className="text-blue-600 hover:underline text-sm"
+                          className="px-3 py-1.5 text-sm rounded bg-gray-800 text-white hover:bg-gray-900"
                         >
-                          Calificar
+                          Ver retroalimentación
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-600">Retroalimentación:</p>
+                      <pre className="text-sm bg-gray-50 border rounded p-3 whitespace-pre-wrap">
+                        {typeof feedback === "string"
+                          ? feedback
+                          : JSON.stringify(feedback, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
       </MainLayout>
+      {modalOpen && modalData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold">Retroalimentación IA</h3>
+                <p className="text-sm text-gray-500">
+                  {modalData.estudiante}
+                </p>
+              </div>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-auto">
+              <p className="text-sm text-gray-500 mb-3">
+                Fecha:{" "}
+                {modalData.fecha
+                  ? new Date(modalData.fecha).toLocaleString()
+                  : "Sin fecha"}
+              </p>
+              <div className="whitespace-pre-wrap text-gray-800">
+                {typeof modalData.feedback === "string"
+                  ? modalData.feedback
+                  : JSON.stringify(modalData.feedback, null, 2)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthGuard>
   );
 }
