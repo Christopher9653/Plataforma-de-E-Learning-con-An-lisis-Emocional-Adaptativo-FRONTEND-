@@ -27,13 +27,6 @@ export default function Navbar() {
 
         {/* MENU DESKTOP */}
         <div className="hidden md:flex space-x-8 text-gray-700 dark:text-gray-300 font-medium">
-                  {/* 🆕 CURSOS */}
-          <Link
-            href="/dashboard/categorias"
-            className="hover:text-blue-500 dark:hover:text-blue-400 transition"
-          >
-            Cursos
-          </Link>
         
           <Link
             href="/"

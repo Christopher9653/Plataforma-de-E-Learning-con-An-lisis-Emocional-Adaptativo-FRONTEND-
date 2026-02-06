@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
+import jsPDF from "jspdf";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layout/MainLayout";
 import { AuthContext } from "@/context/AuthContext";
@@ -13,6 +14,7 @@ export default function ReportesDocente() {
 
   const [cursos, setCursos] = useState([]);
   const [reportes, setReportes] = useState({});
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [loading, setLoading] = useState(true);
 
   /* ===============================
@@ -30,29 +32,25 @@ export default function ReportesDocente() {
     }
 
     fetchCursos();
-  }, [user]);
+  }, [user, token]);
 
   /* ===============================
       CURSOS DEL DOCENTE
   =============================== */
   const fetchCursos = async () => {
     try {
-      const res = await fetch(
-        `${API}/course/?teacher=${user.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await fetch(`${API}/teacher-course/${user.id}`);
       const data = await res.json();
-      const lista = data.results || data;
+      const lista = data.results || data || [];
       setCursos(lista);
 
-      for (const curso of lista) {
-        await generarReporteCurso(curso.id);
-      }
+      await Promise.all(
+        lista.map((curso) => generarReporteCurso(curso.id))
+      );
+      setLastUpdated(new Date());
     } catch (error) {
       console.error(error);
+      setCursos([]);
     } finally {
       setLoading(false);
     }
@@ -63,56 +61,44 @@ export default function ReportesDocente() {
   =============================== */
   const generarReporteCurso = async (courseId) => {
     try {
-      // Total capítulos
-      const capRes = await fetch(
-        `${API}/course-chapters/?module__course=${courseId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      // Módulos y clases reales
+      const modRes = await fetch(`${API}/course/${courseId}/modules/`);
+      const modData = modRes.ok ? await modRes.json() : [];
+      const modulos = modData.results || modData || [];
+
+      let totalClases = 0;
+      await Promise.all(
+        modulos.map(async (mod) => {
+          const resVid = await fetch(`${API}/modules/${mod.id}/videos/`);
+          const vids = resVid.ok ? await resVid.json() : [];
+          const lista = vids.results || vids || [];
+          totalClases += lista.length;
+        })
       );
 
-      const capData = await capRes.json();
-      const totalCapitulos = (capData.results || capData).length;
-
-      // Estudiantes inscritos
-      const estRes = await fetch(
-        `${API}/student-courses/?course=${courseId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const estData = await estRes.json();
-      const estudiantes = (estData.results || estData).length;
-
-      // Progreso total
-      const progRes = await fetch(
-        `${API}/chapter-progress/?course=${courseId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const progData = await progRes.json();
-      const completados = (progData.results || progData).length;
-
-      const progresoPromedio =
-        totalCapitulos && estudiantes
-          ? Math.round(
-              (completados / (totalCapitulos * estudiantes)) * 100
-            )
-          : 0;
-
+      // Estudiantes inscritos por curso
+      const estRes = await fetch(`${API}/fetch-enrolled-students/${courseId}`);
+      const estData = estRes.ok ? await estRes.json() : [];
+      const estudiantes = Array.isArray(estData) ? estData.length : 0;
       setReportes((prev) => ({
         ...prev,
         [courseId]: {
           estudiantes,
-          totalCapitulos,
-          progresoPromedio,
+          totalCapitulos: totalClases,
+          totalModulos: modulos.length,
         },
       }));
     } catch (error) {
       console.warn("Reporte incompleto", error);
+      setReportes((prev) => ({
+        ...prev,
+        [courseId]: {
+          estudiantes: 0,
+          totalCapitulos: 0,
+          totalModulos: 0,
+          progresoPromedio: null,
+        },
+      }));
     }
   };
 
@@ -152,7 +138,7 @@ export default function ReportesDocente() {
                     {curso.title}
                   </h2>
 
-                  <div className="grid grid-cols-3 gap-4 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                       <p className="text-sm text-gray-500">
                         Estudiantes
@@ -160,6 +146,31 @@ export default function ReportesDocente() {
                       <p className="text-2xl font-bold">
                         {r.estudiantes ?? 0}
                       </p>
+                      <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                        <div
+                          className="h-2 bg-green-600 rounded"
+                          style={{
+                            width: `${Math.min(100, (r.estudiantes || 0) * 10)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Módulos
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {r.totalModulos ?? 0}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                        <div
+                          className="h-2 bg-blue-600 rounded"
+                          style={{
+                            width: `${Math.min(100, (r.totalModulos || 0) * 10)}%`,
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -169,21 +180,87 @@ export default function ReportesDocente() {
                       <p className="text-2xl font-bold">
                         {r.totalCapitulos ?? 0}
                       </p>
+                      <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                        <div
+                          className="h-2 bg-purple-600 rounded"
+                          style={{
+                            width: `${Math.min(100, (r.totalCapitulos || 0) * 10)}%`,
+                          }}
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Progreso Promedio
-                      </p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {r.progresoPromedio ?? 0}%
-                      </p>
-                    </div>
                   </div>
+
+                  <div className="flex flex-wrap gap-3 mt-6">
+                    <button
+                      onClick={() => router.push(`/dashboard/docente/clases/${curso.id}`)}
+                      className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Ver clases
+                    </button>
+                    <button
+                      onClick={() => router.push(`/dashboard/docente/estudiantes?course=${curso.id}`)}
+                      className="px-4 py-2 text-sm rounded bg-purple-600 text-white hover:bg-purple-700"
+                    >
+                      Ver estudiantes
+                    </button>
+                    <button
+                      onClick={() => {
+                        const pdf = new jsPDF("p", "mm", "a4");
+                        const W = pdf.internal.pageSize.getWidth();
+                        pdf.setFontSize(18);
+                        pdf.text("Reporte Académico del Curso", W / 2, 18, { align: "center" });
+                        pdf.setFontSize(12);
+                        pdf.text(`Curso: ${curso.title}`, 10, 30);
+                        pdf.text(`Docente: ${user?.full_name || user?.fullname || "Docente"}`, 10, 38);
+                        pdf.text(`Fecha: ${new Date().toLocaleString()}`, 10, 46);
+                        pdf.setLineWidth(0.3);
+                        pdf.line(10, 52, W - 10, 52);
+
+                        pdf.setFontSize(13);
+                        pdf.text("Métricas", 10, 62);
+                        pdf.setFontSize(11);
+                        pdf.text(`Estudiantes: ${r.estudiantes ?? 0}`, 10, 72);
+                        pdf.text(`Módulos: ${r.totalModulos ?? 0}`, 10, 80);
+                        pdf.text(`Clases: ${r.totalCapitulos ?? 0}`, 10, 88);
+
+                        // Barras simples
+                        const maxBar = 120;
+                        const barY = 100;
+                        const est = Math.min(1, (r.estudiantes ?? 0) / 10);
+                        const mod = Math.min(1, (r.totalModulos ?? 0) / 10);
+                        const cla = Math.min(1, (r.totalCapitulos ?? 0) / 10);
+                        pdf.setFillColor(16, 185, 129);
+                        pdf.rect(10, barY, maxBar * est, 6, "F");
+                        pdf.text("Estudiantes", 10 + maxBar + 5, barY + 5);
+
+                        pdf.setFillColor(59, 130, 246);
+                        pdf.rect(10, barY + 10, maxBar * mod, 6, "F");
+                        pdf.text("Módulos", 10 + maxBar + 5, barY + 15);
+
+                        pdf.setFillColor(139, 92, 246);
+                        pdf.rect(10, barY + 20, maxBar * cla, 6, "F");
+                        pdf.text("Clases", 10 + maxBar + 5, barY + 25);
+
+                        pdf.save(`reporte_curso_${curso.id}.pdf`);
+                      }}
+                      className="px-4 py-2 text-sm rounded bg-gray-800 text-white hover:bg-gray-900"
+                    >
+                      Descargar PDF
+                    </button>
+                  </div>
+
                 </div>
               );
             })}
           </div>
+        )}
+
+        {lastUpdated && (
+          <p className="text-sm text-gray-500 mt-6">
+            Última actualización: {lastUpdated.toLocaleString()}
+          </p>
         )}
       </div>
     </MainLayout>

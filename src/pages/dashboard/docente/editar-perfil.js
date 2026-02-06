@@ -8,18 +8,23 @@ import { AuthContext } from "@/context/AuthContext";
 
 const API = "http://localhost:8000/api";
 
-export default function EditarPerfilEstudiante() {
+export default function EditarPerfilDocente() {
   const { user, setUser } = useContext(AuthContext);
   const router = useRouter();
 
   const [form, setForm] = useState({
     fullname: user?.fullname || "",
     email: user?.email || "",
-    username: user?.username || "",
+    qualification: user?.qualification || "",
+    mobile_no: user?.mobile_no || "",
+    skills: user?.skills || "",
+    face_url: user?.face_url || "",
+    insta_url: user?.insta_url || "",
+    twit_url: user?.twit_url || "",
+    web_url: user?.web_url || "",
+    you_url: user?.you_url || "",
     password: "",
     confirm_password: "",
-    interested_categories:
-      user?.interseted_categories || user?.interested_categories || "",
     profile_img: null,
   });
 
@@ -31,9 +36,6 @@ export default function EditarPerfilEstudiante() {
     user?.profile_img || user?.photo || ""
   );
 
-  /* ===============================
-     INPUT TEXTO
-  =============================== */
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -42,9 +44,6 @@ export default function EditarPerfilEstudiante() {
     setFieldErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
 
-  /* ===============================
-     INPUT ARCHIVO
-  =============================== */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setForm({
@@ -57,9 +56,6 @@ export default function EditarPerfilEstudiante() {
     }
   };
 
-  /* ===============================
-     SUBMIT
-  =============================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -75,7 +71,25 @@ export default function EditarPerfilEstudiante() {
     } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       errors.email = "Email inválido";
     }
-    if (!form.username.trim()) errors.username = "El usuario es obligatorio";
+    if (!form.qualification.trim())
+      errors.qualification = "La especialidad es obligatoria";
+    if (!form.mobile_no.trim())
+      errors.mobile_no = "El teléfono es obligatorio";
+    if (form.face_url && !/^https?:\/\//i.test(form.face_url)) {
+      errors.face_url = "Debe ser una URL válida (http/https)";
+    }
+    if (form.insta_url && !/^https?:\/\//i.test(form.insta_url)) {
+      errors.insta_url = "Debe ser una URL válida (http/https)";
+    }
+    if (form.twit_url && !/^https?:\/\//i.test(form.twit_url)) {
+      errors.twit_url = "Debe ser una URL válida (http/https)";
+    }
+    if (form.web_url && !/^https?:\/\//i.test(form.web_url)) {
+      errors.web_url = "Debe ser una URL válida (http/https)";
+    }
+    if (form.you_url && !/^https?:\/\//i.test(form.you_url)) {
+      errors.you_url = "Debe ser una URL válida (http/https)";
+    }
     if (form.password.trim()) {
       if (form.password.length < 6) {
         errors.password = "La contraseña debe tener al menos 6 caracteres";
@@ -92,29 +106,27 @@ export default function EditarPerfilEstudiante() {
     }
 
     try {
-      /* ===============================
-         1️⃣ ACTUALIZAR PERFIL
-      =============================== */
+      // 1) Actualizar perfil
       const formData = new FormData();
-      formData.append("fullname", form.fullname);
+      formData.append("full_name", form.fullname);
       formData.append("email", form.email);
-      formData.append("username", form.username);
-      formData.append(
-        "interseted_categories",
-        form.interested_categories
-      );
+      formData.append("qualification", form.qualification);
+      formData.append("mobile_no", form.mobile_no);
+      formData.append("skills", form.skills);
+      formData.append("face_url", form.face_url);
+      formData.append("insta_url", form.insta_url);
+      formData.append("twit_url", form.twit_url);
+      formData.append("web_url", form.web_url);
+      formData.append("you_url", form.you_url);
 
       if (form.profile_img) {
         formData.append("profile_img", form.profile_img);
       }
 
-      const resPerfil = await fetch(
-        `${API}/student/${user.id}/`,
-        {
-          method: "PATCH",
-          body: formData,
-        }
-      );
+      const resPerfil = await fetch(`${API}/teacher/${user.id}/`, {
+        method: "PATCH",
+        body: formData,
+      });
 
       if (!resPerfil.ok) {
         throw new Error("Error al actualizar el perfil");
@@ -122,15 +134,13 @@ export default function EditarPerfilEstudiante() {
 
       const data = await resPerfil.json();
 
-      /* ===============================
-         2️⃣ CAMBIAR CONTRASEÑA (OPCIONAL)
-      =============================== */
+      // 2) Cambiar contraseña si aplica
       if (form.password.trim() !== "") {
         const passwordData = new FormData();
         passwordData.append("password", form.password);
 
         const resPassword = await fetch(
-          `${API}/student/change-password/${user.id}/`,
+          `${API}/teacher/change-password/${user.id}/`,
           {
             method: "POST",
             body: passwordData,
@@ -142,28 +152,28 @@ export default function EditarPerfilEstudiante() {
         }
       }
 
-      /* ===============================
-         3️⃣ ACTUALIZAR CONTEXTO
-      =============================== */
+      // 3) Actualizar contexto
       const updatedUser = {
         ...user,
-        fullname: data.fullname,
-        email: data.email,
-        username: data.username,
-        interseted_categories: data.interseted_categories,
-        interested_categories: data.interseted_categories,
+        fullname: data.fullname || form.fullname,
+        email: data.email || form.email,
+        qualification: data.qualification || form.qualification,
+        mobile_no: data.mobile_no || form.mobile_no,
+        skills: data.skills || form.skills,
+        face_url: data.face_url || form.face_url,
+        insta_url: data.insta_url || form.insta_url,
+        twit_url: data.twit_url || form.twit_url,
+        web_url: data.web_url || form.web_url,
+        you_url: data.you_url || form.you_url,
         photo: data.profile_img || user.photo,
         profile_img: data.profile_img || user.profile_img,
       };
 
-      localStorage.setItem(
-        "eduemotion_user",
-        JSON.stringify(updatedUser)
-      );
+      localStorage.setItem("eduemotion_user", JSON.stringify(updatedUser));
       setUser(updatedUser);
 
       setSuccess("Perfil actualizado correctamente");
-      router.push("/dashboard/estudiante/perfil");
+      router.push("/dashboard/docente/perfil");
     } catch (err) {
       console.error(err);
       setError(err.message || "No se pudo actualizar el perfil");
@@ -173,28 +183,22 @@ export default function EditarPerfilEstudiante() {
   };
 
   return (
-    <AuthGuard role="estudiante">
+    <AuthGuard role="docente">
       <MainLayout>
         <div className="p-10 bg-gray-50 min-h-screen">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8">
-            <h1 className="text-2xl font-bold mb-6">
-              Editar Perfil
-            </h1>
+            <h1 className="text-2xl font-bold mb-6">Editar Perfil</h1>
 
             {error && (
-              <div className="mb-4 text-red-600 text-sm">
-                {error}
-              </div>
+              <div className="mb-4 text-red-600 text-sm">{error}</div>
             )}
             {success && (
-              <div className="mb-4 text-green-600 text-sm">
-                {success}
-              </div>
+              <div className="mb-4 text-green-600 text-sm">{success}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
-                label="Fullname"
+                label="Nombre completo"
                 name="fullname"
                 value={form.fullname}
                 onChange={handleChange}
@@ -211,11 +215,66 @@ export default function EditarPerfilEstudiante() {
               />
 
               <Input
-                label="Username"
-                name="username"
-                value={form.username}
+                label="Especialidad"
+                name="qualification"
+                value={form.qualification}
                 onChange={handleChange}
-                error={fieldErrors.username}
+                error={fieldErrors.qualification}
+              />
+
+              <Input
+                label="Teléfono"
+                name="mobile_no"
+                value={form.mobile_no}
+                onChange={handleChange}
+                error={fieldErrors.mobile_no}
+              />
+
+              <Input
+                label="Habilidades"
+                name="skills"
+                value={form.skills}
+                onChange={handleChange}
+              />
+
+              <Input
+                label="Facebook URL"
+                name="face_url"
+                value={form.face_url}
+                onChange={handleChange}
+                error={fieldErrors.face_url}
+              />
+
+              <Input
+                label="Instagram URL"
+                name="insta_url"
+                value={form.insta_url}
+                onChange={handleChange}
+                error={fieldErrors.insta_url}
+              />
+
+              <Input
+                label="Twitter/X URL"
+                name="twit_url"
+                value={form.twit_url}
+                onChange={handleChange}
+                error={fieldErrors.twit_url}
+              />
+
+              <Input
+                label="Website URL"
+                name="web_url"
+                value={form.web_url}
+                onChange={handleChange}
+                error={fieldErrors.web_url}
+              />
+
+              <Input
+                label="YouTube URL"
+                name="you_url"
+                value={form.you_url}
+                onChange={handleChange}
+                error={fieldErrors.you_url}
               />
 
               <Input
@@ -239,25 +298,9 @@ export default function EditarPerfilEstudiante() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-600">
-                  Interested categories
-                </label>
-                <textarea
-                  name="interested_categories"
-                  value={form.interested_categories}
-                  onChange={handleChange}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600">
                   Profile img
                 </label>
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="mt-1"
-                />
+                <input type="file" onChange={handleFileChange} className="mt-1" />
                 {previewUrl && (
                   <img
                     src={previewUrl}
@@ -270,9 +313,7 @@ export default function EditarPerfilEstudiante() {
               <div className="flex justify-between pt-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push("/dashboard/estudiante/perfil")
-                  }
+                  onClick={() => router.push("/dashboard/docente/perfil")}
                   className="px-4 py-2 bg-gray-300 rounded-lg"
                 >
                   Cancelar
@@ -294,19 +335,11 @@ export default function EditarPerfilEstudiante() {
   );
 }
 
-/* ===============================
-   INPUT REUTILIZABLE
-=============================== */
 function Input({ label, error, ...props }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-600">
-        {label}
-      </label>
-      <input
-        {...props}
-        className="w-full mt-1 px-3 py-2 border rounded-lg"
-      />
+      <label className="block text-sm font-medium text-gray-600">{label}</label>
+      <input {...props} className="w-full mt-1 px-3 py-2 border rounded-lg" />
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
   );

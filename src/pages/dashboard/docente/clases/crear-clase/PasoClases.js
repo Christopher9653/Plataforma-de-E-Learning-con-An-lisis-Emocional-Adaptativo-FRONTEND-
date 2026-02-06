@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
 const API = "http://localhost:8000/api";
@@ -11,17 +11,29 @@ export default function PasoClases({ courseId, modulos, onFinish }) {
   const cursoId = courseId || router.query.course;
   const moduloUnico = router.query.modulo;
 
-  const baseModulos = moduloUnico
-    ? modulos.filter((m) => m.id == moduloUnico)
-    : modulos;
+  const baseModulos = useMemo(() => {
+    const safeModulos = Array.isArray(modulos) ? modulos : [];
+    return moduloUnico
+      ? safeModulos.filter((m) => m.id == moduloUnico)
+      : safeModulos;
+  }, [moduloUnico, modulos]);
 
-  const [clases, setClases] = useState(
-    baseModulos.map((m) => ({
-      moduleId: m.id,
-      moduleTitle: m.title,
-      lessons: [{ title: "", video: null }],
-    }))
-  );
+  const [clases, setClases] = useState([]);
+
+  useEffect(() => {
+    if (baseModulos.length === 0) {
+      setClases([]);
+      return;
+    }
+
+    setClases(
+      baseModulos.map((m) => ({
+        moduleId: m.id,
+        moduleTitle: m.title,
+        lessons: [{ title: "", video: null }],
+      }))
+    );
+  }, [baseModulos]);
 
   const addClase = (mIndex) => {
     const copy = [...clases];
