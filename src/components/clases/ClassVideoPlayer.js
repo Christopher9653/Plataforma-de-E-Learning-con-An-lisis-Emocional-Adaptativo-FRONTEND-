@@ -384,9 +384,25 @@ const generarPrueba = async () => {
                   >
                     ▶ {cl.title || cl.titulo}
                   </div>
+                  
                 ))}
             </div>
           ))}
+                    <button
+            disabled={!emotionTools}
+            onClick={() => emotionTools?.exportJSON()}
+            className="mt-4 w-full px-4 py-2 bg-gray-800 text-white rounded-lg"
+          >
+            Exportar JSON
+          </button>
+
+          <button
+            disabled={!emotionTools}
+            onClick={() => emotionTools?.exportPDF()}
+            className="mt-2 w-full px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Exportar PDF
+          </button>
         </div>
       </div>
     </div>
