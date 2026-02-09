@@ -7,7 +7,6 @@ import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useEmotion } from "@/context/EmotionContext";
 
-
 export default function ClassVideoPlayer({ curso }) {
   const router = useRouter();
 
@@ -25,10 +24,13 @@ export default function ClassVideoPlayer({ curso }) {
   //Para backend
   const [emotionalReport, setEmotionalReport] = useState(null);
   const [enviandoPrueba, setEnviandoPrueba] = useState(false);
+  const [showMaxAttemptsModal, setShowMaxAttemptsModal] = useState(false);
+  const [maxAttemptsMessage, setMaxAttemptsMessage] = useState(
+    "Has alcanzado el máximo de intentos para generar esta prueba.",
+  );
 
   //Para guardar emotion_report
   const { setEmotionReport } = useEmotion();
-
 
   const videoRef = useRef(null);
 
@@ -39,7 +41,7 @@ export default function ClassVideoPlayer({ curso }) {
     if (!curso || !Array.isArray(curso.modulos)) return;
 
     const primerModulo = curso.modulos.find(
-      (m) => Array.isArray(m.clases) && m.clases.length > 0
+      (m) => Array.isArray(m.clases) && m.clases.length > 0,
     );
 
     if (!primerModulo) return;
@@ -112,13 +114,13 @@ export default function ClassVideoPlayer({ curso }) {
     if (!curso?.modulos?.length || !videoActual) return;
 
     const todasLasClases = curso.modulos.flatMap((m) =>
-      Array.isArray(m.clases) ? m.clases : []
+      Array.isArray(m.clases) ? m.clases : [],
     );
 
     if (!todasLasClases.length) return;
 
     const indexActual = todasLasClases.findIndex(
-      (c) => c.id === videoActual.id
+      (c) => c.id === videoActual.id,
     );
 
     const siguiente = todasLasClases[indexActual + 1];
@@ -185,48 +187,76 @@ export default function ClassVideoPlayer({ curso }) {
   // ================================
   // Generador de Prueba
   // ================================
-const generarPrueba = async () => {
-  try {
-    setEnviandoPrueba(true);
-    const report = emotionTools?.getReport();
-     if (!report) {
-    alert("No se ha generado el reporte emocional.");
-    console.log("No se ha ggenerado: ",report);
-    setEnviandoPrueba(false);
-    return;
-  }
+  const generarPrueba = async () => {
+    try {
+      setEnviandoPrueba(true);
+      const report = emotionTools?.getReport();
+      if (!report) {
+        alert("No se ha generado el reporte emocional.");
+        console.log("No se ha ggenerado: ", report);
+        setEnviandoPrueba(false);
+        return;
+      }
 
-    // ✅ Guardar en contexto global
-    setEmotionReport(report);
+      // ✅ Guardar en contexto global
+      setEmotionReport(report);
 
-    const res = await fetch("https://edumotion-backend1.onrender.com/api/generate-test-attempt/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        student_id: user.id,
-        chapter_id: videoActual.id,
-        informe_emocional: emotionalReport,
-      }),
-    });
+      const res = await fetch(
+        "https://edumotion-backend1.onrender.com/api/generate-test-attempt/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            student_id: user.id,
+            chapter_id: videoActual.id,
+            informe_emocional: emotionalReport,
+          }),
+        },
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(JSON.stringify(data));
+      if (!res.ok) {
+        const rawMessage = (
+          data?.detail ||
+          data?.message ||
+          data?.error ||
+          data?.errors ||
+          ""
+        )
+          .toString()
+          .toLowerCase();
+        const isMaxAttempts =
+          res.status === 400 &&
+          (rawMessage.includes("max_attempts") ||
+            (rawMessage.includes("max") &&
+              (rawMessage.includes("intento") ||
+                rawMessage.includes("attempt"))));
+
+        if (isMaxAttempts) {
+          setMaxAttemptsMessage(
+            data?.detail ||
+              data?.message ||
+              "Has alcanzado el máximo de intentos para generar esta prueba.",
+          );
+          setShowMaxAttemptsModal(true);
+          return;
+        }
+
+        throw new Error(JSON.stringify(data));
+      }
+
+      router.push(`/dashboard/estudiante/quizzes/${videoActual.id}`);
+    } catch (err) {
+      console.error("Error al generar prueba:", err.message);
+      alert("No se pudo generar la prueba");
+    } finally {
+      setEnviandoPrueba(false);
     }
-
-    router.push(`/dashboard/estudiante/quizzes/${videoActual.id}`);
-  } catch (err) {
-    console.error("Error al generar prueba:", err.message);
-    alert("No se pudo generar la prueba");
-  } finally {
-    setEnviandoPrueba(false);
-  }
-};
-
+  };
 
   // ================================
   // LOADING
@@ -240,6 +270,22 @@ const generarPrueba = async () => {
   // ================================
   return (
     <div className="w-full h-screen flex flex-col bg-[#f4f4f4]">
+      {showMaxAttemptsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Límite de intentos alcanzado
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">{maxAttemptsMessage}</p>
+            <button
+              onClick={() => setShowMaxAttemptsModal(false)}
+              className="mt-5 w-full rounded-lg bg-indigo-600 px-4 py-2 text-white font-semibold hover:bg-indigo-700 transition"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
       {/* TOP BAR */}
       <div className="w-full bg-[#1c1d1f] text-white px-6 py-3 flex justify-between items-center shadow-lg">
         <div className="text-lg font-medium">
@@ -384,11 +430,10 @@ const generarPrueba = async () => {
                   >
                     ▶ {cl.title || cl.titulo}
                   </div>
-                  
                 ))}
             </div>
           ))}
-                    <button
+          {/* <button
             disabled={!emotionTools}
             onClick={() => emotionTools?.exportJSON()}
             className="mt-4 w-full px-4 py-2 bg-gray-800 text-white rounded-lg"
@@ -402,10 +447,9 @@ const generarPrueba = async () => {
             className="mt-2 w-full px-4 py-2 bg-red-600 text-white rounded-lg"
           >
             Exportar PDF
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
   );
 }
-
