@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import MainLayout from "@/components/layout/MainLayout";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { AuthContext } from "@/context/AuthContext";
+import Link from "next/link";
 
 import PasoModulos from "./crear-clase/PasoModulos";
 import PasoClases from "./crear-clase/PasoClases";
@@ -170,8 +171,18 @@ export default function CursoDetalleDocente() {
   return (
     <AuthGuard role="docente">
       <MainLayout>
+        
         <div className="p-10 bg-gray-50 min-h-screen">
+          <div className="mb-6">
+          <Link
+            href="/dashboard/docente/clases"
+            className="inline-block px-4 py-2 rounded border text-sm hover:bg-white"
+          >
+            Volver a clases
+          </Link>
+        </div>
           {/* ENCABEZADO */}
+          
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">{curso.title}</h1>
@@ -236,7 +247,7 @@ export default function CursoDetalleDocente() {
                           Intentos
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={() =>
                             router.push(
                               `/dashboard/docente/quizzes/calificar?chapter=${clase.id}`
@@ -245,7 +256,7 @@ export default function CursoDetalleDocente() {
                           className="px-3 py-1.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100"
                         >
                           Calificar
-                        </button>
+                        </button> */}
                         {/* Configuraciones por clase */}
                         <button
                           onClick={() =>

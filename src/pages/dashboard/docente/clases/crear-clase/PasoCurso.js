@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
+import Swal from "sweetalert2";
 
 const API = "https://edumotion-backend1.onrender.com/api";
 
@@ -78,8 +79,11 @@ export default function PasoCurso({ onNext, setCourseId }) {
       // Avanzamos al siguiente paso
       onNext();
     } catch (err) {
-      console.error("Error creando curso:", err);
-      alert("❌ Error al crear el curso");
+      await Swal.fire(
+        "Error",
+        "No se pudo crear el curso",
+        "error"
+      );
     } finally {
       setLoading(false);
     }

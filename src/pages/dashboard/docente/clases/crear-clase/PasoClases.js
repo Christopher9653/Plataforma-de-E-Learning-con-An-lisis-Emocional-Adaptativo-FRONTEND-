@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 
 const API = "https://edumotion-backend1.onrender.com/api";
@@ -64,11 +65,21 @@ export default function PasoClases({ courseId, modulos, onFinish }) {
         }
       }
 
+      await Swal.fire(
+        "Clases creadas",
+        "Las clases se subieron correctamente",
+        "success"
+      );
+
       onFinish?.();
       router.push(`/dashboard/docente/clases/${cursoId}`);
     } catch (err) {
       console.error(err);
-      alert("Error al crear clases");
+      await Swal.fire(
+        "Error",
+        "No se pudieron subir las clases",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -120,6 +131,7 @@ export default function PasoClases({ courseId, modulos, onFinish }) {
           </button>
         </div>
       ))}
+
 
       <button
         onClick={handleSubmit}
