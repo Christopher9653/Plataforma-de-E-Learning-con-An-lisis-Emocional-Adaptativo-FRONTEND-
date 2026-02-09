@@ -27,25 +27,22 @@ export default function Home() {
             <div className="grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
               <div className="text-white">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold tracking-wide backdrop-blur">
-                  Nuevo 2026 - Educaci?n sensible a emociones
+                  Nuevo 2026 - Educación sensible a emociones
                 </span>
                 <h1 className="mt-6 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
-                  Plataforma de E-Learning con An?lisis Emocional
+                  Plataforma de E-Learning con Análisis Emocional
                 </h1>
                 <p className="mt-6 text-lg md:text-xl text-white/90 max-w-xl">
-                  Revolucionamos la educaci?n con IA adaptativa que entiende,
-                  acompa?a y potencia el aprendizaje en tiempo real.
+                  Revolucionamos la educación con IA adaptativa que entiende,
+                  acompaña y potencia el aprendizaje en tiempo real.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <button className="bg-white text-slate-900 px-8 py-3 rounded-full font-semibold hover:bg-slate-100 transition duration-300">
-                    Comenzar Ahora
-                  </button>
-                  <button className="border border-white/70 text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-slate-900 transition duration-300">
-                    Ver Demo
-                  </button>
+                  <a href="/register" className="bg-white text-slate-900 px-8 py-3 rounded-full font-semibold hover:bg-slate-100 transition duration-300">
+                Comenzar Ahora
+              </a>
                 </div>
                 <div className="mt-6 text-sm text-white/80">
-                  Sin tarjeta - Configuraci?n en minutos
+                  Sin tarjeta - Configuración en minutos
                 </div>
               </div>
               <div className="relative">
@@ -67,17 +64,17 @@ export default function Home() {
                     </div>
                     <div className="mt-5 flex items-center justify-between">
                       <div className="text-sm font-semibold">
-                        Motivaci?n: 82%
+                        Motivación: 82%
                       </div>
                       <div className="text-xs text-slate-500">
-                        ?ltimos 7 d?as
+                        Últimos 7 días
                       </div>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-3 text-white">
                     <div className="rounded-xl bg-white/10 p-3">
                       <div className="text-xs uppercase tracking-wide text-white/70">
-                        Emoci?n
+                        Emoción
                       </div>
                       <div className="mt-2 text-lg font-semibold">Calma</div>
                     </div>
@@ -94,11 +91,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Informaci?n Section */}
+        {/* Informacion Section */}
         <section id="informacion" className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
-              ?Qu? Ofrecemos?
+              ¿Qué Ofrecemos?
             </h2>
             <div className="grid gap-6 md:grid-cols-3">
               <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-800/80 dark:border-zinc-700">
@@ -141,7 +138,9 @@ export default function Home() {
                 <div className="absolute -right-12 -bottom-8 h-24 w-24 rounded-full bg-fuchsia-200/40 blur-2xl" />
                 <div className="relative">
                   <div className="bg-fuchsia-100 dark:bg-fuchsia-900 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 text-2xl">
-                    ??
+                    <span className="text-purple-600 dark:text-purple-400 text-xl">
+                    👁️
+                  </span>
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
                     Seguimiento Integral
@@ -250,21 +249,18 @@ export default function Home() {
           <div className="absolute -bottom-24 right-10 h-56 w-56 rounded-full bg-cyan-400/30 blur-3xl" />
           <div className="relative max-w-4xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-5">
-              ?Listo para transformar tu experiencia educativa?
+              Listo para transformar tu experiencia educativa?
             </h2>
             <p className="text-lg md:text-xl mb-8 text-white/85">
-              ?nete a miles de estudiantes y educadores que ya usan nuestra plataforma.
+              Únete a miles de estudiantes y educadores que ya usan nuestra plataforma.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-slate-900 px-8 py-3 rounded-full font-semibold hover:bg-slate-100 transition duration-300">
+              <a href="/register" className="bg-white text-slate-900 px-8 py-3 rounded-full font-semibold hover:bg-slate-100 transition duration-300">
                 Crear Cuenta Gratis
-              </button>
-              <button className="border border-white/70 text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-slate-900 transition duration-300">
-                Solicitar Demo
-              </button>
+              </a>
             </div>
             <div className="mt-6 text-sm text-white/70">
-              Atenci?n personalizada en menos de 24 horas
+              Atención personalizada en menos de 24 horas
             </div>
           </div>
         </section>

@@ -198,13 +198,6 @@ export default function PerfilDocente() {
                   </span>
                 )}
               </div>
-
-              <button
-                disabled
-                className="mt-4 px-4 py-2 text-sm rounded-lg bg-gray-300 text-gray-600 cursor-not-allowed"
-              >
-                Cambiar foto (próximamente)
-              </button>
             </div>
 
             {/* DATOS */}

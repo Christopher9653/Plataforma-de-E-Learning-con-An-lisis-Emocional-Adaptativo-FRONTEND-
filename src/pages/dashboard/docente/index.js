@@ -121,7 +121,7 @@ export default function DocenteDashboard() {
             <div className="text-center">
               <p className="text-3xl font-bold text-purple-600">—</p>
               <p className="text-gray-600 mt-1">
-                Progreso Promedio
+                Progreso Promedio 
               </p>
             </div>
 
@@ -136,21 +136,14 @@ export default function DocenteDashboard() {
               href="/dashboard/docente/clases"
               className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              Mis Clases
+              Mis Cursos
             </Link>
 
             <Link
-              href="/dashboard/docente/clases/crear"
+              href="/dashboard/docente/clases/crear-clase"
               className="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             >
               Crear Curso
-            </Link>
-
-            <Link
-              href="/dashboard/docente/estudiantes"
-              className="px-5 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-            >
-              Estudiantes
             </Link>
 
             <Link

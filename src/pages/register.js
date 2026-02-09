@@ -142,7 +142,7 @@ export default function RegisterPage() {
             />
             <p className="text-xs text-gray-600">
               Longitud de contrasena: {formData.password.length}/
-              {MIN_PASSWORD_LENGTH} (minimo recomendado)
+              {MIN_PASSWORD_LENGTH} (recomendado)
             </p>
 
             <input
