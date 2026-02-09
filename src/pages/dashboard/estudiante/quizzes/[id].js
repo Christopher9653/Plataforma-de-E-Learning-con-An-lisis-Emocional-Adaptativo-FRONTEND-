@@ -224,12 +224,12 @@ ${answerText}`;
                         ⬅ Regresar al curso
                       </button>
 
-                      <button
+                      {/* <button
                         onClick={descargarPDF}
                         className="flex-1 bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition"
                       >
                         📄 Descargar PDF
-                      </button>
+                      </button> */}
                     </div>
                   </>
                 ) : (
@@ -237,7 +237,9 @@ ${answerText}`;
                     <textarea
                       className="w-full flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
                       rows={12}
-                      placeholder="Escribe aquí tu respuesta..."
+                      placeholder="Esto es un ejemplo de cómo debe colocar tu respuesta: 
+                      1.- Respuesta 
+                      2.- Respuesta"
                       value={answerText}
                       onChange={(e) => setAnswerText(e.target.value)}
                     />
