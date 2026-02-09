@@ -408,3 +408,4 @@ const generarPrueba = async () => {
     </div>
   );
 }
+
