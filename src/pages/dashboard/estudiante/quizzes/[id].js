@@ -237,7 +237,7 @@ ${answerText}`;
                     <textarea
                       className="w-full flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
                       rows={12}
-                      placeholder="Ejemplo: 1.- Esto es un ejemplo de cómo debe colocar tu respuesta"
+                      placeholder="Escribe aquí tu respuesta..."
                       value={answerText}
                       onChange={(e) => setAnswerText(e.target.value)}
                     />
